@@ -1,0 +1,83 @@
+services:
+
+  gateway:
+    pull_policy: build
+    build:
+      context: ./
+      dockerfile: ./gateway/Dockerfile
+    image: gateway
+    container_name: gateway
+    restart: on-failure
+    ports:
+      - 4443:443
+    networks:
+      - transcendence
+
+  auth:
+    pull_policy: build
+    build: ./backend/auth/
+    image: auth
+    container_name: auth
+    restart: on-failure
+    env_file: .env
+    networks:
+      - transcendence
+
+  game:
+    pull_policy: build
+    build: ./backend/game/
+    image: game
+    container_name: game
+    restart: on-failure
+    depends_on:
+      - stats
+      - tournament
+    networks:
+      - transcendence
+
+  lobby:
+    pull_policy: build
+    build: ./backend/lobby/
+    image: lobby
+    container_name: lobby
+    restart: on-failure
+    networks:
+      - transcendence
+
+  stats:
+    pull_policy: build
+    build: ./backend/stats/
+    image: stats
+    container_name: stats
+    restart: on-failure
+    networks:
+      - transcendence
+
+  tournament:
+    pull_policy: build
+    build: ./backend/tournament/
+    image: tournament
+    container_name: tournament
+    restart: on-failure
+    networks:
+      - transcendence
+    volumes:
+      - ./db/:/app/db/
+
+  users:
+    pull_policy: build
+    build: ./backend/users/
+    image: users
+    container_name: users
+    restart: on-failure
+    networks:
+      - transcendence
+    volumes:
+      - users:/var/local
+
+volumes:
+  users:
+
+networks:
+  transcendence:
+    name: transcendence
