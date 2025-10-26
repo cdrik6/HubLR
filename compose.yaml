@@ -11,17 +11,17 @@ services:
     ports:
       - 4443:443
     networks:
-      - transcendence
+      - gradient
 
-  auth:
-    pull_policy: build
-    build: ./backend/auth/
-    image: auth
-    container_name: auth
-    restart: on-failure
-    env_file: .env
-    networks:
-      - transcendence
+  # auth:
+  #   pull_policy: build
+  #   build: ./backend/auth/
+  #   image: auth
+  #   container_name: auth
+  #   restart: on-failure
+  #   env_file: .env
+  #   networks:
+  #     - transcendence
 
   game:
     pull_policy: build
@@ -31,18 +31,18 @@ services:
     restart: on-failure
     depends_on:
       - stats
-      - tournament
+      # - tournament
     networks:
-      - transcendence
+      - gradient
 
-  lobby:
-    pull_policy: build
-    build: ./backend/lobby/
-    image: lobby
-    container_name: lobby
-    restart: on-failure
-    networks:
-      - transcendence
+  # lobby:
+  #   pull_policy: build
+  #   build: ./backend/lobby/
+  #   image: lobby
+  #   container_name: lobby
+  #   restart: on-failure
+  #   networks:
+  #     - transcendence
 
   stats:
     pull_policy: build
@@ -51,33 +51,33 @@ services:
     container_name: stats
     restart: on-failure
     networks:
-      - transcendence
+      - gradient
 
-  tournament:
-    pull_policy: build
-    build: ./backend/tournament/
-    image: tournament
-    container_name: tournament
-    restart: on-failure
-    networks:
-      - transcendence
-    volumes:
-      - ./db/:/app/db/
+  # tournament:
+  #   pull_policy: build
+  #   build: ./backend/tournament/
+  #   image: tournament
+  #   container_name: tournament
+  #   restart: on-failure
+  #   networks:
+  #     - transcendence
+  #   volumes:
+  #     - ./db/:/app/db/
 
-  users:
-    pull_policy: build
-    build: ./backend/users/
-    image: users
-    container_name: users
-    restart: on-failure
-    networks:
-      - transcendence
-    volumes:
-      - users:/var/local
+  # users:
+  #   pull_policy: build
+  #   build: ./backend/users/
+  #   image: users
+  #   container_name: users
+  #   restart: on-failure
+  #   networks:
+  #     - transcendence
+  #   volumes:
+  #     - users:/var/local
 
-volumes:
-  users:
+# volumes:
+#   users:
 
 networks:
-  transcendence:
-    name: transcendence
+  gradient:
+    name: gradient
