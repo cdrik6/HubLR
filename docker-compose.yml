@@ -1,0 +1,39 @@
+services:
+
+  gateway:
+    pull_policy: build
+    build:
+      context: ./
+      dockerfile: ./gateway/Dockerfile
+    image: gateway
+    container_name: gateway
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - gradient
+
+  algo:
+    pull_policy: build
+    build: ./backend/algo/
+    image: algo
+    container_name: algo
+    restart: on-failure
+    depends_on:
+      - data      
+    networks:
+      - gradient 
+
+  data:
+    pull_policy: build
+    build: ./backend/data/
+    image: data
+    container_name: data
+    restart: on-failure
+    networks:
+      - gradient
+   
+networks:
+  gradient:
+    name: gradient

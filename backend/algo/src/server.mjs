@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import { WebSocketServer } from 'ws';
 import http from 'http';
 const fast = fastify({ logger: true });
-const PORT = 443;
+const PORT = 80;
 const HOST = '0.0.0.0';
 
 import { Game } from './Game.mjs'
