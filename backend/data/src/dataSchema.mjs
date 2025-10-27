@@ -2,23 +2,10 @@ export const insertSchema = {
     body: {
         type: "object",			
         properties: {
-            gameid : { type: "integer" },
-            userid1 : { type: "integer" },
-            userid2 : { type: "integer" },				
-            player1: { type: "string" },
-            player2: { type: "string" },
-            winner: { type: "string" },
-            winnerid: { type: "integer" },
-            score1 : { type: "integer" },
-            score2 : { type: "integer" },
-            maxtouch : { type: "integer" },
-            speedy : { type: "boolean" },
-            paddy : { type: "boolean" },
-            wally : { type: "boolean" },
-            mirry : { type: "boolean" },
-            multy : { type: "boolean" }
+            km : { type: "integer" },
+            price : { type: "integer" }            
         },
-        required: ["gameid", "userid1", "userid2", "player1", "player2", "winner", "winnerid", "score1", "score2", "maxtouch", "speedy", "paddy", "wally", "mirry", "multy"],
+        required: ["km", "price"],
         additionalProperties: false
     },		
     response: {

@@ -32,3 +32,4 @@ export function navigate(path_page, pushState = true) {
 	else
 		history.replaceState({}, '', path_page);
 }
+

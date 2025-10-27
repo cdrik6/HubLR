@@ -1,21 +1,19 @@
-import { db } from './stats.mjs'
+import { db } from './data.mjs'
 import { execute, fetchAll } from './sql.mjs';
-import { insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './statsSchema.mjs'
+import { insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
 
-async function isAuthorized(req) {
-	const resAuth = await fetch(`http://auth:443/me`, {method: "GET", headers: req.headers});
-	if (resAuth.status === 401)
-		return false;
-	if (!resAuth.ok)
-		throw new Error("Communication with auth microservice failed");
-	const bodyAuth = await resAuth.json();
-	return (true);
-}
+// async function isAuthorized(req) {
+// 	const resAuth = await fetch(`http://auth:443/me`, {method: "GET", headers: req.headers});
+// 	if (resAuth.status === 401)
+// 		return false;
+// 	if (!resAuth.ok)
+// 		throw new Error("Communication with auth microservice failed");
+// 	const bodyAuth = await resAuth.json();
+// 	return (true);
+// }
 
-
-export default async function statsRoutes(fast, options)
+export default async function dataRoutes(fast, options)
 {		
-
 	// delete user stats data
 	fast.delete('/remove', { schema: deleteSchema }, async function(request, reply) {
 		console.log("in delete id")
@@ -41,14 +39,14 @@ export default async function statsRoutes(fast, options)
 		}
 	})
 
-	// route to insert data from end of game to db/game	of stats
+	// route to insert data from loading
 	fast.post('/insert', { schema: insertSchema }, async function(request, reply)
 	{			
 		try	{
-			const { gameid, userid1, userid2, player1, player2, winner, winnerid, score1, score2, maxtouch, speedy, paddy, wally, mirry, multy } = request.body;
-			const data = { gameid, userid1, userid2, player1, player2, winner, winnerid, score1, score2, maxtouch, speedy, paddy, wally, mirry, multy };						
+			const { km, price } = request.body;
+			const data = { km, price };
 			await insertData(data);
-			reply.code(201).send({ message: "Data of game inserted in stats.db" });
+			reply.code(201).send({ message: "Data inserted" });
 		}
 		catch (err)	{
 			console.error(err);
@@ -323,8 +321,8 @@ export default async function statsRoutes(fast, options)
 
 async function insertData(data)
 {
-	const sql = `INSERT INTO game (gameid, userid1, userid2, player1, player2, winner, winnerid, score1, score2, maxtouch, speedy, paddy, wally, mirry, multy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-	await execute(db, sql, [Number(data.gameid), data.userid1, data.userid2, data.player1, data.player2, data.winner, data.winnerid, Number(data.score1), Number(data.score2), Number(data.maxtouch), data.speedy, data.paddy, data.wally, data.mirry, data.multy]);
+	const sql = `INSERT INTO data (km, price) VALUES (?, ?)`;
+	await execute(db, sql, [data.km, data.price]);
 }
 
 async function getAllData()
