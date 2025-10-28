@@ -9,7 +9,7 @@ services:
     container_name: gateway
     restart: on-failure
     ports:
-      - "80:80"
+      # - "80:80"
       - "443:443"
     networks:
       - gradient

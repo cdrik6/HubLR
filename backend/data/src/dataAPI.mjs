@@ -1,4 +1,4 @@
-import { db } from './data.mjs'
+import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
 import { insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
 

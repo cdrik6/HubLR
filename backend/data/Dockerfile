@@ -14,4 +14,4 @@ RUN npm install
 
 COPY src/ src/
 
-CMD ["node", "src/data.mjs"]
+CMD ["node", "src/server.mjs"]
