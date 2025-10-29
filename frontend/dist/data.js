@@ -1,7 +1,8 @@
 const fileInput = document.getElementById("fileInput");
 const fileContent = document.getElementById("fileContent");
-const message = document.getElementById("message");
-const loadBtn = document.getElementById("LoadBtn");
+const fileMessage = document.getElementById("fileMessage");
+const loadMessage = document.getElementById("loadMessage");
+const loadBtn = document.getElementById("loadBtn");
 let rawdata;
 
 fileInput.addEventListener("change", handleFileSelection);
@@ -11,18 +12,14 @@ function handleFileSelection(event)
 {
   const file = event.target.files[0];
   fileContent.textContent = "";
-  message.textContent = "";
+  fileMessage.textContent = "";
+  loadMessage.textContent = "";
   
   if (!file)  
-    return (showMessage("No file selected. Please choose a file.", "error"));
-
+    return(showMessage("No file selected. Please choose a file.", "file"));
   // Check whether the MIME type begins with "text" ("text/plain" or "text/csv")
-  if (!file.type.startsWith("text"))
-  {
-    // return (showMessage("Unsupported file type. Please select a text/csv file.", "error"));
-    showMessage("Unsupported file type. Please select a text/csv file.", "error");
-    return;
-  } 
+  if (!file.type.startsWith("text"))  
+    return(showMessage("Unsupported file type. Please select a text/csv file.", "file"));   
   
   const reader = new FileReader();
 
@@ -33,49 +30,60 @@ function handleFileSelection(event)
   };
 
   reader.onerror = () => {
-    showMessage("Error reading the file. Please try again.", "error");
+    showMessage("Error reading the file. Please try again.", "file");
   };
 
   reader.readAsText(file);
 }
 
-
 async function handleLoadData()
 {
   if (!rawdata)
-      return;    
-  const lines = rawdata.split(/\r?\n/); // split by newline
+    return(showMessage("No data.", "load"));  
+  
+  const lines = rawdata.split(/\r?\n/); // split by newline  
   if (lines.length === 0)
-    return(showMessage("Empty file.", "error"));  
+    return(showMessage("Empty file.", "load"));  
 
   // Header checking
   const header = lines[0].split(',');
   if (header[0].trim() !== "km" || header[1].trim() !== "price")      
-    return(showMessage("Wrong header.", "error"));
+    return(showMessage("Wrong header: " + header, "load"));
 
   // Lines checking and load if ok    
   for (let i = 1; i < lines.length; i++)
   {
     const line = lines[i].trim();      
-    if (!line)
+    if (!line) {
+      showMessage("Empty line.", "load")
       continue; // skip empty lines
+    }
 
     const rows = line.split(',');
-    if (rows.length !== 2)
+    if (rows.length !== 2) {
+      showMessage("Wrong data: " + rows, "load")
       continue;
+    }
+
     const km = Number.parseInt(rows[0].trim());
     const price = Number.parseInt(rows[1].trim());
-    if (Number.isNaN(km) || Number.isNaN(price))
+    if (Number.isNaN(km) || Number.isNaN(price)) {
+      showMessage("Not a Number: " + rows, "load")
       continue;
-    await loadData(km, price);
+    }
+    await loadData(km, price);    
   }
-  loadBtn.style.display = "none";
+
+  // loadBtn.style.display = "none";
+  rawdata = null;
 }
 
-function showMessage(message, type)
+function showMessage(message, step)
 {
-  message.textContent = message;
-  message.style.color = type === "error" ? "red" : "green";
+  if (step === "file")
+    fileMessage.textContent = message;
+  if (step === "load")
+    loadMessage.textContent += message + "\n";
 }
 
 async function loadData(km, price)
