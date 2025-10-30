@@ -131,15 +131,15 @@ export default async function dataRoutes(fast, options)
 	fast.get('/scatter', { schema: scatterSchema }, async function (request, reply)
 	{		
 		try {					
-			const diffvsmax = await getDiffMaxTouch();			
+			const points = await getPoints();			
 			// console.log('Diffvsmax');
 			// console.log(diffvsmax);
-			const data = diffvsmax.map(point => ({ x: point.spread, y: point.maxtouch }));			
+			const data = points.map(point => ({ x: point.km, y: point.price }));
 			reply.code(200).send(data);
 		}
 		catch (err)	{
 			console.error(err);
-			reply.code(500).send({ error: "Get data from game to scatter chart failed" });
+			reply.code(500).send({ error: "Get data to scatter chart failed" });
 		}
 	});
 	
@@ -433,6 +433,16 @@ async function getWinDiff()
 		ON d.userid = w.userid
 		GROUP BY d.userid
 		ORDER BY nbWin DESC, point DESC, nbMatch DESC;
+	`;
+	return (await fetchAll(db, sql));
+}
+
+async function getPoints()
+{
+	const sql = `
+		SELECT km, price
+		FROM data
+		ORDER BY km;
 	`;
 	return (await fetchAll(db, sql));
 }
