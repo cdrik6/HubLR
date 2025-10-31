@@ -125,25 +125,57 @@ export default async function dataRoutes(fast, options)
 		}
 	});	
 	
+	/************************************** */
 
-
-	// route to create a scatter chart form db/game of the tightscore vs max
+	// route to create a scatter chart form db/data of the km vs price
 	fast.get('/scatter', { schema: scatterSchema }, async function (request, reply)
 	{		
 		try {					
-			const points = await getPoints();			
-			// console.log('Diffvsmax');
-			// console.log(diffvsmax);
+			const points = await getPoints();
 			const data = points.map(point => ({ x: point.km, y: point.price }));
 			reply.code(200).send(data);
+			console.log("Points:");
+			console.log(points);
+			console.log("Datapoints:");
+			console.log(data);
+			const X = data.map(point => point.x);
+			const Y = data.map(point => point.y);
+			const mX = mean(X);
+			const mY = mean(Y);
+			console.log(X);
+			console.log(Y);
+			console.log(mX);
+			console.log(mY);
 		}
 		catch (err)	{
 			console.error(err);
 			reply.code(500).send({ error: "Get data to scatter chart failed" });
 		}
-	});
-	
+	});	
 
+	// // route to create a reg+scatter chart form db/data of the km vs price
+	// fast.get('/reg', { schema: scatterSchema }, async function (request, reply)
+	// {		
+	// 	try {					
+	// 		const points = await getPoints();			
+	// 		const datapoints = points.map(point => ({ x: point.km, y: point.price }));
+	// 		const dataline = await getLine(points);
+	// 		reply.code(200).send(datapoints, dataline);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get data to reg chart failed" });
+	// 	}
+	// });
+
+	function mean(arr)
+	{		
+		if (arr.length === 0)
+			return (0);
+  		return (arr.reduce((sum, x) => sum + x, 0) / arr.length);
+	}
+
+	/************************************** */
 
 	// route to get the main data of a user
 	fast.get('/:id/userdata', { schema: userdataSchema }, async function (request, reply)
