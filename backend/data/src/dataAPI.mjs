@@ -1,43 +1,34 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
-import { insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
-
-// async function isAuthorized(req) {
-// 	const resAuth = await fetch(`http://auth:443/me`, {method: "GET", headers: req.headers});
-// 	if (resAuth.status === 401)
-// 		return false;
-// 	if (!resAuth.ok)
-// 		throw new Error("Communication with auth microservice failed");
-// 	const bodyAuth = await resAuth.json();
-// 	return (true);
-// }
+// import { regSchema, insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
+import { regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
 
 export default async function dataRoutes(fast, options)
 {		
-	// delete user stats data
-	fast.delete('/remove', { schema: deleteSchema }, async function(request, reply) {
-		console.log("in delete id")
-		try {
-			// const id = Number(request.params.id);
-			const resAuth = await fetch('http://auth:443/me', {method: 'GET', headers: request.headers});
-			const data = await resAuth.json();
-			if (!resAuth.ok)
-				return (reply.code(400).send({error: 'Not authorized'}));
-			console.log("auth done")
-			let sql = `UPDATE game SET player1 = ? WHERE userid1 = ?`;
-			const exec1 = await execute(db, sql, ["none", data.id]);
-			console.log("execute userid1", exec1);
-			sql = `UPDATE game SET player2 = ? WHERE userid2 = ?`;
-			const exec2 = await execute(db, sql, ["none", data.id]);
-			sql = `UPDATE game SET winner = ? WHERE winnerid = ?`;  // ******* amended here *******///
-			await execute(db, sql, ["none", data.id]); // ******* amended here *******///
-			console.log("execute userid2", exec2);
-			return(reply.code(200).send({message:"Id deleted in stats"}));
-		} catch (error) {
-			console.log(error);
-			reply.code(500).send({error: "deleting userID stats failed"});
-		}
-	})
+	// // delete user stats data
+	// fast.delete('/remove', { schema: deleteSchema }, async function(request, reply) {
+	// 	console.log("in delete id")
+	// 	try {
+	// 		// const id = Number(request.params.id);
+	// 		const resAuth = await fetch('http://auth:443/me', {method: 'GET', headers: request.headers});
+	// 		const data = await resAuth.json();
+	// 		if (!resAuth.ok)
+	// 			return (reply.code(400).send({error: 'Not authorized'}));
+	// 		console.log("auth done")
+	// 		let sql = `UPDATE game SET player1 = ? WHERE userid1 = ?`;
+	// 		const exec1 = await execute(db, sql, ["none", data.id]);
+	// 		console.log("execute userid1", exec1);
+	// 		sql = `UPDATE game SET player2 = ? WHERE userid2 = ?`;
+	// 		const exec2 = await execute(db, sql, ["none", data.id]);
+	// 		sql = `UPDATE game SET winner = ? WHERE winnerid = ?`;  // ******* amended here *******///
+	// 		await execute(db, sql, ["none", data.id]); // ******* amended here *******///
+	// 		console.log("execute userid2", exec2);
+	// 		return(reply.code(200).send({message:"Id deleted in stats"}));
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 		reply.code(500).send({error: "deleting userID stats failed"});
+	// 	}
+	// })
 
 	// route to insert data from loading
 	fast.post('/insert', { schema: insertSchema }, async function(request, reply)
@@ -54,76 +45,76 @@ export default async function dataRoutes(fast, options)
 		}		
 	});	
 
-	fast.patch('/:userid/amend', { schema: amendSchema }, async function(request, reply)
-	{		
-		try	{
-			const userid = Number(request.params.userid);
-			const { newAlias } = request.body;
-			console.log("From settings to stats.db: " + userid + " - " + newAlias);
-			await amendAlias(userid, newAlias);
-			reply.code(200).send({ message: "Alias amended in stats.db" });
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Amending failed" });
-		}		
-	});
+	// fast.patch('/:userid/amend', { schema: amendSchema }, async function(request, reply)
+	// {		
+	// 	try	{
+	// 		const userid = Number(request.params.userid);
+	// 		const { newAlias } = request.body;
+	// 		console.log("From settings to stats.db: " + userid + " - " + newAlias);
+	// 		await amendAlias(userid, newAlias);
+	// 		reply.code(200).send({ message: "Alias amended in stats.db" });
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Amending failed" });
+	// 	}		
+	// });
 
 
 
-	// route to create the pie chart form db/game of the selected customization 
-	fast.get('/pie', { schema: pieSchema }, async function (request, reply)
-	{		
-		try {		
-			const speedy = await getCustom("speedy");
-			const paddy = await getCustom("paddy");
-			const wally = await getCustom("wally");
-			const mirry = await getCustom("mirry");
-			const multy = await getCustom("multy");
-			const std = await getStandard();
-			const data = {
-				labels: ['Standard', 'Speedy', 'Paddy', 'Wally', 'Mirry', 'Multy'],
-				values: [std?.[0]?.total ?? 0, speedy?.[0]?.total ?? 0, paddy?.[0]?.total ?? 0, wally?.[0]?.total ?? 0,	mirry?.[0]?.total ?? 0,	multy?.[0]?.total ?? 0]
-			};
-			reply.code(200).send(data);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get data from game to pie chart failed" });
-		}
-	});
+	// // route to create the pie chart form db/game of the selected customization 
+	// fast.get('/pie', { schema: pieSchema }, async function (request, reply)
+	// {		
+	// 	try {		
+	// 		const speedy = await getCustom("speedy");
+	// 		const paddy = await getCustom("paddy");
+	// 		const wally = await getCustom("wally");
+	// 		const mirry = await getCustom("mirry");
+	// 		const multy = await getCustom("multy");
+	// 		const std = await getStandard();
+	// 		const data = {
+	// 			labels: ['Standard', 'Speedy', 'Paddy', 'Wally', 'Mirry', 'Multy'],
+	// 			values: [std?.[0]?.total ?? 0, speedy?.[0]?.total ?? 0, paddy?.[0]?.total ?? 0, wally?.[0]?.total ?? 0,	mirry?.[0]?.total ?? 0,	multy?.[0]?.total ?? 0]
+	// 		};
+	// 		reply.code(200).send(data);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get data from game to pie chart failed" });
+	// 	}
+	// });
 
 
 
-	// route to create a bar chart form db/game of the rank
-	fast.get('/bar', { schema: barSchema }, async function (request, reply)
-	{		
-		try {					
-			// const player1 = await getPlayer1Diff();			
-			// console.log(player1);
-			// const player2 = await getPlayer2Diff();			
-			// console.log(player2);
-			// const player = await getPlayerDiff();			
-			// console.log(player);
-			// const winner = await getWinner();			
-			// console.log(winner);
-			const windiff = await getWinDiff();
-			console.log('Bar Chart, windiff:');
-			console.log(windiff); // player, userid, nbWin, point, nbMatch
-			const data = {
-				// player: windiff.map(item => item.player),
-				player: windiff.map(item => `${item.player} (${item.userid})`),
-				nbWin: windiff.map(item => item.nbWin),
-				point: windiff.map(item => item.point),
-				nbMatch: windiff.map(item => item.nbMatch)
-			};			
-			reply.code(200).send(data);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get data from game to bar chart failed" });
-		}
-	});	
+	// // route to create a bar chart form db/game of the rank
+	// fast.get('/bar', { schema: barSchema }, async function (request, reply)
+	// {		
+	// 	try {					
+	// 		// const player1 = await getPlayer1Diff();			
+	// 		// console.log(player1);
+	// 		// const player2 = await getPlayer2Diff();			
+	// 		// console.log(player2);
+	// 		// const player = await getPlayerDiff();			
+	// 		// console.log(player);
+	// 		// const winner = await getWinner();			
+	// 		// console.log(winner);
+	// 		const windiff = await getWinDiff();
+	// 		console.log('Bar Chart, windiff:');
+	// 		console.log(windiff); // player, userid, nbWin, point, nbMatch
+	// 		const data = {
+	// 			// player: windiff.map(item => item.player),
+	// 			player: windiff.map(item => `${item.player} (${item.userid})`),
+	// 			nbWin: windiff.map(item => item.nbWin),
+	// 			point: windiff.map(item => item.point),
+	// 			nbMatch: windiff.map(item => item.nbMatch)
+	// 		};			
+	// 		reply.code(200).send(data);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get data from game to bar chart failed" });
+	// 	}
+	// });	
 	
 	/************************************** */
 
@@ -137,15 +128,7 @@ export default async function dataRoutes(fast, options)
 			console.log("Points:");
 			console.log(points);
 			console.log("Datapoints:");
-			console.log(data);
-			const X = data.map(point => point.x);
-			const Y = data.map(point => point.y);
-			const mX = mean(X);
-			const mY = mean(Y);
-			console.log(X);
-			console.log(Y);
-			console.log(mX);
-			console.log(mY);
+			console.log(data);			
 		}
 		catch (err)	{
 			console.error(err);
@@ -153,20 +136,38 @@ export default async function dataRoutes(fast, options)
 		}
 	});	
 
-	// // route to create a reg+scatter chart form db/data of the km vs price
-	// fast.get('/reg', { schema: scatterSchema }, async function (request, reply)
-	// {		
-	// 	try {					
-	// 		const points = await getPoints();			
-	// 		const datapoints = points.map(point => ({ x: point.km, y: point.price }));
-	// 		const dataline = await getLine(points);
-	// 		reply.code(200).send(datapoints, dataline);
-	// 	}
-	// 	catch (err)	{
-	// 		console.error(err);
-	// 		reply.code(500).send({ error: "Get data to reg chart failed" });
-	// 	}
-	// });
+	// route to create a reg+scatter chart form db/data of the km vs price
+	fast.get('/reg', { schema: regSchema }, async function (request, reply)
+	{		
+		try {					
+			const points = await getPoints();			
+			const datapoints = points.map(point => ({ x: point.km, y: point.price }));
+			const X = datapoints.map(point => point.x);
+			const Y = datapoints.map(point => point.y);			
+			const mX = mean(X);
+			const mY = mean(Y);
+			console.log(X);
+			console.log(Y);
+			console.log(mX);
+			console.log(mY);
+			const covXY = covariance(datapoints, mX, mY);
+			const varX = variance(X, mX);
+			let m;
+			if (varX)
+				m = covXY / varX;
+			else
+				m = 0;
+			const p = mY - m * mX;
+			const minX = Math.min(...X);
+			const maxX = Math.max(...X);
+			const dataline = [{ x: minX, y: m * minX + p },{ x: maxX, y: m * maxX + p}];
+			reply.code(200).send({ datapoints, dataline });
+		}
+		catch (err)	{
+			console.error(err);
+			reply.code(500).send({ error: "Get data to reg chart failed" });
+		}
+	});
 
 	function mean(arr)
 	{		
@@ -175,137 +176,151 @@ export default async function dataRoutes(fast, options)
   		return (arr.reduce((sum, x) => sum + x, 0) / arr.length);
 	}
 
+	function covariance(arr, mX, mY)
+	{		
+		if (arr.length === 0)
+			return (0);
+  		return (arr.reduce((sum, { x, y }) => sum + (x - mX)*(y - mY), 0));
+	}
+
+	function variance(arr, mX)
+	{		
+		if (arr.length === 0)
+			return (0);
+  		return (arr.reduce((sum, x) => sum + (x - mX)*(x - mX), 0));
+	}
+
 	/************************************** */
 
-	// route to get the main data of a user
-	fast.get('/:id/userdata', { schema: userdataSchema }, async function (request, reply)
-	{		
-		// check
-		try {
-			if (!(await isAuthorized(request)))
-			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
-		}
-		catch (e) {
-			console.error(`Error: ${e}`);
-			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
-		}		
-		// then		
-		try {					
-			const userid = request.params.id;
-			const userdata = await getUserData(userid);
-			const rank = await getRank(userid);
-			userdata[0].rank = rank;
-			console.log('Userdata:');
-			console.log(userdata);
-			reply.code(200).send(userdata);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get user data from game failed"});
-		}
-	});
+	// // route to get the main data of a user
+	// fast.get('/:id/userdata', { schema: userdataSchema }, async function (request, reply)
+	// {		
+	// 	// check
+	// 	try {
+	// 		if (!(await isAuthorized(request)))
+	// 		return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
+	// 	}
+	// 	catch (e) {
+	// 		console.error(`Error: ${e}`);
+	// 		return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
+	// 	}		
+	// 	// then		
+	// 	try {					
+	// 		const userid = request.params.id;
+	// 		const userdata = await getUserData(userid);
+	// 		const rank = await getRank(userid);
+	// 		userdata[0].rank = rank;
+	// 		console.log('Userdata:');
+	// 		console.log(userdata);
+	// 		reply.code(200).send(userdata);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get user data from game failed"});
+	// 	}
+	// });
 
 
 
-	// route to create the user pie chart from db/game of the selected customization 
-	fast.get('/:id/userpie', { schema: userpieSchema }, async function (request, reply)
-	{	
-		// check
-		try {
-			if (!(await isAuthorized(request)))
-			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
-		}
-		catch (e) {
-			console.error(`Error: ${e}`);
-			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
-		}		
-		// then
-		try {					
-			const userid = request.params.id;
-			const userdata = await getUserData(userid)
-			const std = await getUserStandard(userid);
-			const data = {
-				labels: ['Standard', 'Speedy', 'Paddy', 'Wally', 'Mirry', 'Multy'],
-				values: [std?.[0]?.total ?? 0, userdata?.[0]?.speedy ?? 0, userdata?.[0]?.paddy ?? 0, userdata?.[0]?.wally ?? 0, userdata?.[0]?.mirry ?? 0, userdata?.[0]?.multy ?? 0]
-			};
-			console.log('Userpie:');
-			console.log(data);
-			reply.code(200).send(data);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get data from game to pie chart failed" });
-		}
-	});
+	// // route to create the user pie chart from db/game of the selected customization 
+	// fast.get('/:id/userpie', { schema: userpieSchema }, async function (request, reply)
+	// {	
+	// 	// check
+	// 	try {
+	// 		if (!(await isAuthorized(request)))
+	// 		return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
+	// 	}
+	// 	catch (e) {
+	// 		console.error(`Error: ${e}`);
+	// 		return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
+	// 	}		
+	// 	// then
+	// 	try {					
+	// 		const userid = request.params.id;
+	// 		const userdata = await getUserData(userid)
+	// 		const std = await getUserStandard(userid);
+	// 		const data = {
+	// 			labels: ['Standard', 'Speedy', 'Paddy', 'Wally', 'Mirry', 'Multy'],
+	// 			values: [std?.[0]?.total ?? 0, userdata?.[0]?.speedy ?? 0, userdata?.[0]?.paddy ?? 0, userdata?.[0]?.wally ?? 0, userdata?.[0]?.mirry ?? 0, userdata?.[0]?.multy ?? 0]
+	// 		};
+	// 		console.log('Userpie:');
+	// 		console.log(data);
+	// 		reply.code(200).send(data);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get data from game to pie chart failed" });
+	// 	}
+	// });
 
 
 
-	// route to create the user line touch chart from db/game
-	fast.get('/:id/userline', { schema: userlineSchema }, async function (request, reply)
-	{		
-		// check
-		try {
-			if (!(await isAuthorized(request)))
-			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
-		}
-		catch (e) {
-			console.error(`Error: ${e}`);
-			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
-		}		
-		// then
-		try {					
-			const userid = request.params.id;
-			const usertouch = await getUserTouch(userid);
-			console.log(usertouch);
-			const data = {
-				row: usertouch.map(p => p.row),				
-				maxtouch: usertouch.map(p => p.maxtouch)
-			};
-			console.log('Userline:');
-			console.log(data);
-			reply.code(200).send(data);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get user touch data from game failed"});
-		}
-	});
+	// // route to create the user line touch chart from db/game
+	// fast.get('/:id/userline', { schema: userlineSchema }, async function (request, reply)
+	// {		
+	// 	// check
+	// 	try {
+	// 		if (!(await isAuthorized(request)))
+	// 		return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
+	// 	}
+	// 	catch (e) {
+	// 		console.error(`Error: ${e}`);
+	// 		return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
+	// 	}		
+	// 	// then
+	// 	try {					
+	// 		const userid = request.params.id;
+	// 		const usertouch = await getUserTouch(userid);
+	// 		console.log(usertouch);
+	// 		const data = {
+	// 			row: usertouch.map(p => p.row),				
+	// 			maxtouch: usertouch.map(p => p.maxtouch)
+	// 		};
+	// 		console.log('Userline:');
+	// 		console.log(data);
+	// 		reply.code(200).send(data);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get user touch data from game failed"});
+	// 	}
+	// });
 
 
 
-	// route to create the user line win chart from db/game
-	fast.get('/:id/userwin', { schema: userwinSchema }, async function (request, reply)
-	{		
-		// check
-		try {
-			if (!(await isAuthorized(request)))
-			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
-		}
-		catch (e) {
-			console.error(`Error: ${e}`);
-			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
-		}		
-		// then
-		try {					
-			const userid = request.params.id;
-			const userwin = await getUserWin(userid);
-			console.log(userwin);
-			const data = {
-				row: userwin.map(p => p.row),				
-				win: userwin.map(p => p.winIdx)							
-			};
-			console.log('Userwin');
-			console.log(data);
-			for (let i = 1; i < data.win.length; i++)			
-				data.win[i] = data.win[i-1] + data.win[i];			
-			console.log(data);
-			reply.code(200).send(data);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get user win data from game failed"});
-		}
-	});
+	// // route to create the user line win chart from db/game
+	// fast.get('/:id/userwin', { schema: userwinSchema }, async function (request, reply)
+	// {		
+	// 	// check
+	// 	try {
+	// 		if (!(await isAuthorized(request)))
+	// 		return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
+	// 	}
+	// 	catch (e) {
+	// 		console.error(`Error: ${e}`);
+	// 		return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
+	// 	}		
+	// 	// then
+	// 	try {					
+	// 		const userid = request.params.id;
+	// 		const userwin = await getUserWin(userid);
+	// 		console.log(userwin);
+	// 		const data = {
+	// 			row: userwin.map(p => p.row),				
+	// 			win: userwin.map(p => p.winIdx)							
+	// 		};
+	// 		console.log('Userwin');
+	// 		console.log(data);
+	// 		for (let i = 1; i < data.win.length; i++)			
+	// 			data.win[i] = data.win[i-1] + data.win[i];			
+	// 		console.log(data);
+	// 		reply.code(200).send(data);
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Get user win data from game failed"});
+	// 	}
+	// });
 
 	// // route to create table of all data from db/game
 	// fast.get('/datatable', async function (request, reply)
@@ -322,31 +337,32 @@ export default async function dataRoutes(fast, options)
 
 
 
-	// route to create table of the data user from db/game
-	fast.get('/:id/usertable', { schema: usertableSchema }, async function (request, reply)
-	{		
-		// check
-		try {
-			if (!(await isAuthorized(request)))
-			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
-		}
-		catch (e) {
-			console.error(`Error: ${e}`);
-			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
-		}		
-		// then
-		try {					
-			const userid = request.params.id;
-			const usertable = await getUserTable(userid);
-			console.log('Usertable:');
-			console.log(usertable);
-			reply.code(200).send(usertable);
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Get user data from game failed"});
-		}
-	});
+// 	// route to create table of the data user from db/game
+// 	fast.get('/:id/usertable', { schema: usertableSchema }, async function (request, reply)
+// 	{		
+// 		// check
+// 		try {
+// 			if (!(await isAuthorized(request)))
+// 			return reply.code(401).send({ error: "Error: user is not authorized to access required information" });
+// 		}
+// 		catch (e) {
+// 			console.error(`Error: ${e}`);
+// 			return reply.code(500).send({ error: "Error: server encountered issue while completing request" });
+// 		}		
+// 		// then
+// 		try {					
+// 			const userid = request.params.id;
+// 			const usertable = await getUserTable(userid);
+// 			console.log('Usertable:');
+// 			console.log(usertable);
+// 			reply.code(200).send(usertable);
+// 		}
+// 		catch (err)	{
+// 			console.error(err);
+// 			reply.code(500).send({ error: "Get user data from game failed"});
+// 		}
+// 	});
+
 }
 
 

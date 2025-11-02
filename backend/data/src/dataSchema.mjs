@@ -112,14 +112,57 @@ export const scatterSchema = {
     response: {
         200: {
             type: "array",
-            itels: {
+            items: {
                 type: "object",
                 properties: {
                     x: { type: "integer" },
                     y: { type: "integer" } 
-                },            
+                },
+                required: ["x", "y"],
                 additionalProperties: false
             }
+        },
+        500: {
+            type: "object",
+            properties: { error: { type: "string" } },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+};
+
+export const regSchema = {    
+    response: {
+        200: {
+            type: "object",
+            properties: {
+                datapoints: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            x: { type: "integer" },
+                            y: { type: "integer" } 
+                        },
+                        required: ["x", "y"],    
+                        additionalProperties: false
+                    }                    
+                },
+                dataline: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            x: { type: "integer" },
+                            y: { type: "integer" } 
+                        },
+                        required: ["x", "y"],    
+                        additionalProperties: false    
+                    }                    
+                }
+            },
+            required: ["datapoints", "dataline"],
+            additionalProperties: false
         },
         500: {
             type: "object",
