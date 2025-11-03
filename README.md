@@ -54,3 +54,10 @@ Why not use the direct formula?	Because the goal is to understand optimization, 
 Is gradient descent mathematically necessary here?	No, it’s overkill — but it’s educational.
 Why is it called ft_linear_regression then?	Because you’re training a linear model, even though the focus is the optimization method.
 So what am I really learning?	How to minimize a cost function via gradient descent — the core idea behind all ML.
+
+----
+
+On front side, a SPA, i have an index page with 3 buttons to navigate. when i click on. saying data, it loads data.html and data.js, it is ok, but if i come back on the same page it creates and declares same object and same variables again, that is not clean. Other solution is to load everything.js, but it get elements that are there yet because we are on home, and the elements are elements of data, so it does not work. How to solve that messy organisation? Why not break the SPA concept and just creates different pages to work properly?
+
+You’ve spotted the classic SPA problem:
+Without a proper component or routing system, dynamic reloading and lifecycle management becomes a mess.

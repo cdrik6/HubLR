@@ -1,9 +1,16 @@
-const fileInput = document.getElementById("fileInput");
-const fileContent = document.getElementById("fileContent");
-const fileMessage = document.getElementById("fileMessage");
-const loadMessage = document.getElementById("loadMessage");
-const loadBtn = document.getElementById("loadBtn");
-let rawdata;
+// if (typeof fileInput === "undefined")
+  const fileInput = document.getElementById("fileInput");
+// if (typeof fileContent === "undefined")
+  const fileContent = document.getElementById("fileContent");
+// if (typeof fileMessage === "undefined")
+  const fileMessage = document.getElementById("fileMessage");
+// if (typeof loadMessage === "undefined")
+  const loadMessage = document.getElementById("loadMessage");
+// if (typeof loadBtn === "undefined")
+  const loadBtn = document.getElementById("loadBtn");
+// if (typeof rawdata === "undefined")
+  let rawdata;
+
 
 fileInput.addEventListener("change", handleFileSelection);
 loadBtn.addEventListener("click", handleLoadData);
@@ -26,7 +33,7 @@ function handleFileSelection(event)
   reader.onload = () => {
     rawdata = reader.result;    
     fileContent.textContent = rawdata;
-    loadBtn.style.display = "inline";    
+    // loadBtn.style.display = "inline";    
   };
 
   reader.onerror = () => {
@@ -98,7 +105,7 @@ async function loadData(km, price)
       throw new Error(`HTTP error status: ${res.status}`);
     }		
 		const data = await res.json();	
-		console.log("Server response:", data);
+		// console.log("Server response:", data);
 	}	
 	catch (error) {
 		console.error("Server error:", error);

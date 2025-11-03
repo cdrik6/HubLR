@@ -9,32 +9,9 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">  
-  <!-- <base href="."> -->
-  <!-- <script type="module" src="data.js"></script>     -->
+  <base href=".">
+  <script src="router.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js" ></script>    
-  <script>
-    async function showSection(name) {
-      const res = await fetch(`${name}.html`);
-      const html = await res.text();
-      document.getElementById("content").innerHTML = html; 
-      if (name !== "home")
-        addScript(name);
-    }         
-    function addScript(name) {      
-      const oldScript = document.getElementById("script");
-      if (oldScript)
-        oldScript.remove();      
-      const newScript = document.createElement("script");
-      newScript.id = "script";
-      // if (name === "graph")
-      //   newScript.src = "https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js";
-      // else 
-        newScript.src = `${name}.js`;
-      document.body.appendChild(newScript);
-    }
-    showSection('home');
-  </script>
-  <style></style>
 </head>
 
 <body>
@@ -42,14 +19,14 @@
   <!-- Navbar -->
   <div class="w3-top">    
     <div class="w3-bar w3-red w3-card w3-left-align w3-large">      
-      <a class="w3-bar-item w3-button w3-padding-large w3-white w3-hover-white" onclick="showSection('home')">ft_linear_regression</a>
-      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="showSection('data')">Data</a>
-      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="showSection('graph')">Graph</a>
-      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="showSection('gradient')">Gradient</a>
+      <a class="w3-bar-item w3-button w3-padding-large w3-white w3-hover-white" onclick="navigate('home')">ft_linear_regression</a>
+      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="navigate('data')">Data</a>
+      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="navigate('graph')">Graph</a>
+      <a class="w3-bar-item w3-button w3-padding-large w3-hover-white" onclick="navigate('gradient')">Gradient</a>
     </div>
   </div>
 
-  <div id="content" class="w3-container" style="margin-top:80px;"></div>    
+  <div id="content" class="w3-container" style="margin-top:80px;"></div>
 
 </body>
 

@@ -1,5 +1,7 @@
-const scatterContainer = document.getElementById("scatter");
-const regContainer = document.getElementById("reg");
+if (typeof scatterContainer === "undefined")  
+    var scatterContainer = document.getElementById("scatter");
+if (typeof regContainer === "undefined")
+    var regContainer = document.getElementById("reg");
 
 // Scatter
 const canvasScatter = document.createElement("canvas");	
@@ -19,7 +21,13 @@ fetch(`/api/data/scatter`, { method: 'GET' })
         {
             type: 'scatter',
             data: {					
-                datasets: [{ label: 'km vs price', data: data }]
+                datasets: [
+                    {
+                        label: 'km vs price',
+                        data: data,
+                        backgroundColor: 'rgb(54, 162, 235)'
+                    }
+                ]
             },
             options: {					
                 responsive: true,
@@ -56,9 +64,10 @@ fetch(`/api/data/reg`, { method: 'GET' })
             type: 'scatter',
             data: {					
                 datasets: [
-                    { 
+                    {
                         label: 'km vs price',                        
-                        data: datapoints                        
+                        data: datapoints,
+                        backgroundColor: 'rgb(54, 162, 235)'
                     },
                     {
                         label: 'Regression Line',
