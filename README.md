@@ -55,9 +55,99 @@ Is gradient descent mathematically necessary here?	No, it’s overkill — but i
 Why is it called ft_linear_regression then?	Because you’re training a linear model, even though the focus is the optimization method.
 So what am I really learning?	How to minimize a cost function via gradient descent — the core idea behind all ML.
 
-----
+-----------------------------------------------
 
 On front side, a SPA, i have an index page with 3 buttons to navigate. when i click on. saying data, it loads data.html and data.js, it is ok, but if i come back on the same page it creates and declares same object and same variables again, that is not clean. Other solution is to load everything.js, but it get elements that are there yet because we are on home, and the elements are elements of data, so it does not work. How to solve that messy organisation? Why not break the SPA concept and just creates different pages to work properly?
 
 You’ve spotted the classic SPA problem:
 Without a proper component or routing system, dynamic reloading and lifecycle management becomes a mess.
+
+
+------------------------------------------------------------
+
+if we were not in SPA case, it will reload everything as a first time?
+
+✅ Exactly — and that’s the key difference between **SPA (Single Page Application)** and **MPA (Multi Page Application)**.
+
+Let’s make it crystal clear 👇
+
+---
+
+## 🧱 In a Multi-Page App (non-SPA)
+
+When you click a link like:
+
+```html
+<a href="/data.html">Data</a>
+```
+
+the browser:
+
+1. **Unloads** the current page entirely (DOM, JS context, memory, variables, listeners — all gone).
+2. Sends a new HTTP request to the server for `/data.html`.
+3. Loads the new HTML file, parses it, loads its `<script>` tags, and executes all JS from scratch.
+
+✅ Result:
+
+* Every script runs **as if it were the first time**.
+* No need to manually “cleanup” or “init” things — the browser does that naturally.
+* Each page has a fresh JS context.
+
+---
+
+## 🔁 In a Single-Page App (SPA)
+
+When you simulate navigation (e.g., by dynamically replacing inner HTML):
+
+```js
+document.getElementById("main").innerHTML = html;
+```
+
+the browser:
+
+* Does **not** unload the page or reset JS.
+* Keeps all global variables, event listeners, and imported modules alive.
+* Only replaces the DOM fragment you targeted.
+
+⚠️ This means:
+
+* Old event listeners attached to now-deleted DOM elements disappear silently.
+* You must manually re-initialize behavior for the new HTML.
+* You must clean up the previous page’s state yourself.
+
+---
+
+### 🧩 Summary Table
+
+| Aspect             | Multi-Page App        | Single-Page App           |
+| :----------------- | :-------------------- | :------------------------ |
+| Page reload        | Full browser reload   | JS swaps content          |
+| JS execution       | New context each time | Single long-lived context |
+| State persistence  | Lost on navigation    | Stays in memory           |
+| Need for cleanup() | No                    | Yes                       |
+| Need for init()    | Automatically handled | Manual                    |
+| Simplicity         | Easier                | More complex              |
+| UX smoothness      | Page reloads          | Instant transitions       |
+
+---
+
+### 🧠 TL;DR
+
+> In a normal multi-page app, each navigation **naturally resets everything** — HTML, JS, and state.
+> In a SPA, **nothing resets automatically**, so you must handle lifecycle yourself.
+
+---
+
+So yes — if your app were **not an SPA**, every time you go to `data.html`, the browser would reload and execute `data.js` **as if it were the first time**, automatically cleaning everything up.
+
+-----------------------------------------
+
+fetch() is the right tool to get data or documents,
+import() is the right tool to get code or modules.
+
+| Purpose               | Function                    | Returns                    | What it does             |
+| --------------------- | --------------------------- | -------------------------- | ------------------------ |
+| Load HTML or text     | `fetch()`                   | `Response` → use `.text()` | Gets raw content         |
+| Load JavaScript logic | `import()`                  | `Promise` → module         | Loads & executes JS file |
+| Example               | `await fetch('data.html')`  | string                     | HTML content             |
+| Example               | `await import('./data.js')` | module object              | JS logic loaded          |

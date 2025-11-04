@@ -1,19 +1,24 @@
-// if (typeof fileInput === "undefined")
-  const fileInput = document.getElementById("fileInput");
-// if (typeof fileContent === "undefined")
-  const fileContent = document.getElementById("fileContent");
-// if (typeof fileMessage === "undefined")
-  const fileMessage = document.getElementById("fileMessage");
-// if (typeof loadMessage === "undefined")
-  const loadMessage = document.getElementById("loadMessage");
-// if (typeof loadBtn === "undefined")
-  const loadBtn = document.getElementById("loadBtn");
-// if (typeof rawdata === "undefined")
-  let rawdata;
+let fileInput, fileContent, fileMessage, loadMessage, loadBtn;
+let rawdata;
 
+export function init()
+{
+  fileInput = document.getElementById("fileInput");
+  fileContent = document.getElementById("fileContent");
+  fileMessage = document.getElementById("fileMessage");
+  loadMessage = document.getElementById("loadMessage");
+  loadBtn = document.getElementById("loadBtn");  
+  fileInput.addEventListener("change", handleFileSelection);
+  loadBtn.addEventListener("click", handleLoadData);
+}
 
-fileInput.addEventListener("change", handleFileSelection);
-loadBtn.addEventListener("click", handleLoadData);
+export function cleanup()
+{  
+  fileInput?.removeEventListener("change", handleFileSelection);
+  loadBtn?.removeEventListener("click", handleLoadData);
+  fileInput = fileContent = fileMessage = loadMessage = loadBtn = null;
+  rawdata = null;
+}
 
 function handleFileSelection(event)
 {
