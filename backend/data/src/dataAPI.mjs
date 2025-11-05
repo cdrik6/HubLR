@@ -151,16 +151,21 @@ export default async function dataRoutes(fast, options)
 			console.log(mX);
 			console.log(mY);
 			const covXY = covariance(datapoints, mX, mY);
+			console.log(covXY);
 			const varX = variance(X, mX);
+			console.log(varX);
 			let m;
-			if (varX)
+			if (varX !== 0)
 				m = covXY / varX;
 			else
 				m = 0;
+			console.log(m);
 			const p = mY - m * mX;
-			const minX = Math.min(...X);
-			const maxX = Math.max(...X);
+			const minX = X.length ? Math.min(...X) : 0;
+			const maxX = X.length ? Math.max(...X) : 0;
 			const dataline = [{ x: minX, y: m * minX + p },{ x: maxX, y: m * maxX + p}];
+			console.log(datapoints);
+			console.log(dataline);
 			reply.code(200).send({ datapoints, dataline });
 		}
 		catch (err)	{

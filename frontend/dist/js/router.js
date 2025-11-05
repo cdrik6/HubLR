@@ -27,4 +27,4 @@ async function navigate(page)
         currentModule.init();
 }
 
-// window.navigate = navigate;
+window.navigate = navigate; // make global navigate()

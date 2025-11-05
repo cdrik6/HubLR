@@ -151,3 +151,72 @@ import() is the right tool to get code or modules.
 | Load JavaScript logic | `import()`                  | `Promise` → module         | Loads & executes JS file |
 | Example               | `await fetch('data.html')`  | string                     | HTML content             |
 | Example               | `await import('./data.js')` | module object              | JS logic loaded          |
+
+
+-----------------------------------
+
+and why not just set <script src="/js/router.js"></script> in index.html
+ is window.navigate = navigate; necessary?
+
+This is one of those “looks simple but has deep consequences” JavaScript module questions 😄
+
+## 🧩 1️⃣ Why `type="module"` was used
+When you write:
+<script type="module" src="/js/router.js"></script>
+you’re telling the browser:
+> “This script uses ES Modules (import/export). Please treat it as such.”
+That’s necessary **if you use** things like:
+
+```js
+import { init } from './data.js';
+export function navigate() { ... }
+```
+Without `type="module"`, that would throw a syntax error, because plain `<script>` cannot use `import` or `export`.
+
+## 🧩 2️⃣ Why `window.navigate` is needed
+Inside a module, *nothing is global*.
+For example:
+```js
+export function navigate() { ... }
+```
+creates a local export — **not** a global function.
+So if you have:
+```html
+<button onclick="navigate('/data')">Go</button>
+```
+the browser looks for `navigate` in the **global window scope** — and doesn’t find it.
+That’s why you get:
+> `Uncaught ReferenceError: navigate is not defined`
+
+If you don’t want to `import` it everywhere, then yes — you must explicitly expose it:
+```js
+window.navigate = navigate;
+```
+That makes `navigate()` callable from HTML or from any other script (global scope).
+
+## 🧩 3️⃣ What happens if you remove `type="module"`
+If you change it to:
+```html
+<script src="/js/router.js"></script>
+```
+then:
+* ✅ `navigate()` will be global automatically (no need for `window.navigate`),
+* ❌ but you **cannot use** `import` or `export` inside that script anymore.
+So if `router.js` needs to dynamically import page scripts like:
+```js
+const module = await import(`./${route.js}`);
+```
+then you **must** keep `type="module"`.
+Otherwise you’ll get:
+> `Uncaught SyntaxError: Cannot use import statement outside a module`
+
+## ✅ Summary Table
+| Case                     | Can use `import`/`export` | Is `navigate()` global? | Need `window.navigate`? |
+| ------------------------ | ------------------------- | ----------------------- | ----------------------- |
+| `<script type="module">` | ✅ Yes                     | ❌ No                    | ✅ Yes                   |
+| `<script>` (no module)   | ❌ No                      | ✅ Yes                   | ❌ No                    |
+
+So the rule of thumb is:
+> If you need `import` or `export`, use `type="module"` **and** `window.navigate = navigate;`
+
+---------------------------------------
