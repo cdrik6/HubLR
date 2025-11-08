@@ -1,7 +1,7 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
 // import { regSchema, insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
-import { regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
+import { barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
 
 export default async function dataRoutes(fast, options)
 {		
@@ -84,39 +84,32 @@ export default async function dataRoutes(fast, options)
 	// 	}
 	// });
 
-
-
-	// // route to create a bar chart form db/game of the rank
-	// fast.get('/bar', { schema: barSchema }, async function (request, reply)
-	// {		
-	// 	try {					
-	// 		// const player1 = await getPlayer1Diff();			
-	// 		// console.log(player1);
-	// 		// const player2 = await getPlayer2Diff();			
-	// 		// console.log(player2);
-	// 		// const player = await getPlayerDiff();			
-	// 		// console.log(player);
-	// 		// const winner = await getWinner();			
-	// 		// console.log(winner);
-	// 		const windiff = await getWinDiff();
-	// 		console.log('Bar Chart, windiff:');
-	// 		console.log(windiff); // player, userid, nbWin, point, nbMatch
-	// 		const data = {
-	// 			// player: windiff.map(item => item.player),
-	// 			player: windiff.map(item => `${item.player} (${item.userid})`),
-	// 			nbWin: windiff.map(item => item.nbWin),
-	// 			point: windiff.map(item => item.point),
-	// 			nbMatch: windiff.map(item => item.nbMatch)
-	// 		};			
-	// 		reply.code(200).send(data);
-	// 	}
-	// 	catch (err)	{
-	// 		console.error(err);
-	// 		reply.code(500).send({ error: "Get data from game to bar chart failed" });
-	// 	}
-	// });	
-	
 	/************************************** */
+
+
+	// route to create a bar chart form db/game of the rank
+	fast.get('/bar', { schema: barSchema }, async function (request, reply)
+	{		
+		try {								
+			const km = await getKm();
+			console.log('Bar Chart, km:');
+			console.log(km);
+			// const data = {
+			// 	// player: windiff.map(item => item.player),
+			// 	player: windiff.map(item => `${item.player} (${item.userid})`),
+			// 	nbWin: windiff.map(item => item.nbWin),
+			// 	point: windiff.map(item => item.point),
+			// 	nbMatch: windiff.map(item => item.nbMatch)
+			// };			
+			reply.code(200).send(km);
+		}
+		catch (err)	{
+			console.error(err);
+			reply.code(500).send({ error: "Get data from game to bar chart failed" });
+		}
+	});	
+	
+	
 
 	// route to create a scatter chart form db/data of the km vs price
 	fast.get('/scatter', { schema: scatterSchema }, async function (request, reply)
@@ -494,6 +487,16 @@ async function getPoints()
 {
 	const sql = `
 		SELECT km, price
+		FROM data
+		ORDER BY km;
+	`;
+	return (await fetchAll(db, sql));
+}
+
+async function getKm()
+{
+	const sql = `
+		SELECT km
 		FROM data
 		ORDER BY km;
 	`;

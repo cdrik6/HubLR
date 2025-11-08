@@ -1,11 +1,13 @@
-let scatterContainer, regContainer;
+let scatterContainer, regContainer, barContainer;
 let canvasScatter, ctxScatter;
 let canvasReg, ctxReg;
+let canvasBar, ctxBar;
 
 export function init()
 {
     scatterContainer = document.getElementById("scatter");
     regContainer = document.getElementById("reg");
+    barContainer = document.getElementById("bar");
 
     canvasScatter = document.createElement("canvas");
     canvasScatter.width = 200;
@@ -19,8 +21,15 @@ export function init()
     regContainer.appendChild(canvasReg);
     ctxReg = canvasReg.getContext("2d");
 
+    canvasBar = document.createElement("canvas");	
+    canvasBar.width = 200;
+    canvasBar.height = 200;
+    barContainer.appendChild(canvasBar);
+    ctxBar = canvasBar.getContext("2d");
+
     drawScatter();
     drawReg();
+    drawBar();
 }
 
 export function cleanup()
@@ -128,4 +137,40 @@ function drawReg()
             });		
     })
     .catch(err => { console.error("Reg chart failed: ", err); });
+}
+
+
+// Bar
+function drawBar()
+{	
+	if (!ctxBar) throw new Error("Cannot get bar canvas context");
+	fetch(`/api/data/bar`, { method: 'GET' })
+	.then(res => {
+		if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
+		return (res.json());
+	})
+	.then(function(data)
+	{	
+		new Chart(ctxBar,
+			{
+				type: 'bar',
+				data: {					
+                    labels: ['0–1000', '1000–2000', '2000–3000'],
+					datasets: [	{ label: 'Km', data: data.km } ]
+				},
+				options: {
+					// indexAxis: 'y', // horizontal bars
+					responsive: true,
+					maintainAspectRatio: true,
+					plugins: {
+						legend: { position: 'bottom' },
+						title: { display: true,	text: 'Km data'	}
+					},
+					scales: {						
+						x: { stacked: true }						
+					}
+				}
+			});		
+  	})
+	.catch(err => { console.error("Bar chart failed: ", err); });
 }

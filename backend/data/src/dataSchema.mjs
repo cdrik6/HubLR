@@ -89,15 +89,15 @@ export const pieSchema = {
 export const barSchema = {    
     response: {
         200: {
-            type: "object",
-            properties: {
-                player: { type: "array", items: { type: "string" } },                
-                nbWin: { type: "array", items: { type: "integer" } },
-                point: { type: "array", items: { type: "integer" } },
-                nbMatch: { type: "array", items: { type: "integer" } }                
-            },
-            required: ["player", "nbWin", "point", "nbMatch"],
-            additionalProperties: false
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    km: { type: "integer" }                    
+                },
+                required: ["km"],
+                additionalProperties: false
+            }            
         },
         500: {
             type: "object",
