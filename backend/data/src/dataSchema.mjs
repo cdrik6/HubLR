@@ -93,11 +93,12 @@ export const barSchema = {
             items: {
                 type: "object",
                 properties: {
-                    km: { type: "integer" }                    
+                    label: { type: "string" },
+                    nb: { type: "integer" }
                 },
-                required: ["km"],
+                required: ["label", "nb"],
                 additionalProperties: false
-            }            
+            }
         },
         500: {
             type: "object",

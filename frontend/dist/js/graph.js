@@ -1,14 +1,16 @@
-let scatterContainer, regContainer, barContainer, normContainer;
+let scatterContainer, regContainer, barkmContainer, barpriceContainer, normContainer;
 let canvasScatter, ctxScatter;
 let canvasReg, ctxReg;
-let canvasBar, ctxBar;
+let canvasBarkm, ctxBarkm;
+let canvasBarprice, ctxBarprice;
 let canvasNorm, ctxNorm;
 
 export function init()
 {
     scatterContainer = document.getElementById("scatter");
     regContainer = document.getElementById("reg");
-    barContainer = document.getElementById("bar");
+    barkmContainer = document.getElementById("barkm");
+    barpriceContainer = document.getElementById("barprice");
     normContainer = document.getElementById("norm");
 
     canvasScatter = document.createElement("canvas");
@@ -23,11 +25,17 @@ export function init()
     regContainer.appendChild(canvasReg);
     ctxReg = canvasReg.getContext("2d");
 
-    canvasBar = document.createElement("canvas");	
-    canvasBar.width = 200;
-    canvasBar.height = 200;
-    barContainer.appendChild(canvasBar);
-    ctxBar = canvasBar.getContext("2d");
+    canvasBarkm = document.createElement("canvas");	
+    canvasBarkm.width = 200;
+    canvasBarkm.height = 200;
+    barkmContainer.appendChild(canvasBarkm);
+    ctxBarkm = canvasBarkm.getContext("2d");
+
+    canvasBarprice = document.createElement("canvas");	
+    canvasBarprice.width = 200;
+    canvasBarprice.height = 200;
+    barpriceContainer.appendChild(canvasBarprice);
+    ctxBarprice = canvasBarprice.getContext("2d");
 
     canvasNorm = document.createElement("canvas");	
     canvasNorm.width = 200;
@@ -37,7 +45,8 @@ export function init()
 
     drawScatter();
     drawReg();
-    drawBar();
+    drawBarkm();
+    drawBarprice();
     drawNorm();
 }
 
@@ -149,39 +158,81 @@ function drawReg()
 }
 
 
-// Bar
-function drawBar()
+// Bar km
+function drawBarkm()
 {	
-	if (!ctxBar) throw new Error("Cannot get bar canvas context");
-	fetch(`/api/data/bar`, { method: 'GET' })
+	if (!ctxBarkm) throw new Error("Cannot get bar km canvas context");
+	fetch(`/api/data/barkm`, { method: 'GET' })
 	.then(res => {
 		if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
 		return (res.json());
 	})
 	.then(function(data)
 	{	
-		new Chart(ctxBar,
+		new Chart(ctxBarkm,
 			{
 				type: 'bar',
 				data: {					
-                    labels: ['0–1000', '1000–2000', '2000–3000'],
-					datasets: [	{ label: 'Km', data: data.km } ]
+                    labels: data.map(x => x.label),
+					datasets: [{
+                        label: "Number of cars",
+                        data: data.map(x => x.nb)
+                    }]
 				},
-				options: {
-					// indexAxis: 'y', // horizontal bars
+				options: {					
 					responsive: true,
 					maintainAspectRatio: true,
 					plugins: {
 						legend: { position: 'bottom' },
-						title: { display: true,	text: 'Km data'	}
+						title: { display: true,	text: 'km data'	}
 					},
-					scales: {						
-						x: { stacked: true }						
+					scales: {
+                        x: { title: { display: true, text: 'km range' } },
+                        y: { title: { display: true, text: 'count' } }
 					}
 				}
 			});		
   	})
-	.catch(err => { console.error("Bar chart failed: ", err); });
+	.catch(err => { console.error("Bar km chart failed: ", err); });
+}
+
+
+// Bar price
+function drawBarprice()
+{	
+	if (!ctxBarprice) throw new Error("Cannot get bar km canvas context");
+	fetch(`/api/data/barprice`, { method: 'GET' })
+	.then(res => {
+		if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
+		return (res.json());
+	})
+	.then(function(data)
+	{	
+		new Chart(ctxBarprice,
+			{
+				type: 'bar',
+				data: {					
+                    labels: data.map(x => x.label),
+					datasets: [{
+                        label: "Number of cars",
+                        data: data.map(x => x.nb)
+                    }]
+				},
+				options: {					
+					responsive: true,
+					maintainAspectRatio: true,
+					plugins: {
+						legend: { position: 'bottom' },
+						title: { display: true,	text: 'price data'	}
+					},
+					scales: {
+                        x: { title: { display: true, text: 'price range' } },
+                        y: { title: { display: true, text: 'count' } }
+					}
+				}
+			});		
+  	})
+	.catch(err => { console.error("Bar price chart failed: ", err); });
 }
 
 
@@ -192,11 +243,11 @@ function drawNorm()
     fetch(`/api/data/norm`, { method: 'GET' })
     .then(res => {
         if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
-        return (res.json());
+        return (res.json());const maxX = X.length ? Math.max(...X) : 0;
     })
     .then(function(data)
     {	
-        console.log("Normalized data:", data);
+        // console.log("Normalized data:", data);
         new Chart(ctxNorm,
             {
                 type: 'scatter',

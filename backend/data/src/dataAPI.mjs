@@ -19,25 +19,81 @@ export default async function dataRoutes(fast, options)
 		}		
 	});
 
-	// route to create a bar chart form db/game of the rank
-	fast.get('/bar', { schema: barSchema }, async function (request, reply)
+	// route to create a bar km chart form db/game of the rank
+	fast.get('/barkm', { schema: barSchema }, async function (request, reply)
 	{		
 		try {								
-			const km = await getKm();
+			const kms = await getKm();
+			const km = kms.map(x => x.km);
 			console.log('Bar Chart, km:');
 			console.log(km);
-			// const data = {
-			// 	// player: windiff.map(item => item.player),
-			// 	player: windiff.map(item => `${item.player} (${item.userid})`),
-			// 	nbWin: windiff.map(item => item.nbWin),
-			// 	point: windiff.map(item => item.point),
-			// 	nbMatch: windiff.map(item => item.nbMatch)
-			// };			
-			reply.code(200).send(km);
+			const maxkm = km.length ? Math.max(...km) : 0;
+			const step = 20000;
+			const bins = Math.ceil(maxkm / step) + 1; //15;
+			const counts = new Array(bins).fill(0);
+			const labels = new Array(bins).fill("");
+			for (const x of km)
+			{
+				if (typeof x !== 'number' || Number.isNaN(x))
+					continue;
+				const idx = Math.floor(x / step);
+				if (idx >= 0 && idx < bins)	
+					counts[idx]++;
+				else if (idx >= bins)
+					counts[bins - 1]++;
+			}
+			for (let k = 0; k < bins; k++)
+			{
+				labels[k] = step * k + " - " + step * (k + 1);
+			}
+			console.log(counts);
+			console.log(labels);
+			const data = labels.map((label, i) => ( { label: label, nb: counts[i] }));
+			console.log(data);
+			reply.code(200).send(data);
 		}
 		catch (err)	{
 			console.error(err);
-			reply.code(500).send({ error: "Get data from game to bar chart failed" });
+			reply.code(500).send({ error: "Get histo from data km to bar chart failed" });
+		}
+	});	
+
+	// route to create a bar price chart form db/game of the rank
+	fast.get('/barprice', { schema: barSchema }, async function (request, reply)
+	{		
+		try {								
+			const prices = await getPrice();
+			const price = prices.map(x => x.price);
+			console.log('Bar Chart, price:');
+			console.log(price);
+			const maxprice = price.length ? Math.max(...price) : 0;
+			const step = 1000;
+			const bins = Math.ceil(maxprice / step) + 1; //15;
+			const counts = new Array(bins).fill(0);
+			const labels = new Array(bins).fill("");
+			for (const x of price)
+			{
+				if (typeof x !== 'number' || Number.isNaN(x))
+					continue;
+				const idx = Math.floor(x / step);
+				if (idx >= 0 && idx < bins)	
+					counts[idx]++;
+				else if (idx >= bins)
+					counts[bins - 1]++;
+			}
+			for (let k = 0; k < bins; k++)
+			{
+				labels[k] = step * k + " - " + step * (k + 1);
+			}
+			console.log(counts);
+			console.log(labels);
+			const data = labels.map((label, i) => ( { label: label, nb: counts[i] }));
+			console.log(data);
+			reply.code(200).send(data);
+		}
+		catch (err)	{
+			console.error(err);
+			reply.code(500).send({ error: "Get histo from data price to bar chart failed" });
 		}
 	});	
 
@@ -458,6 +514,16 @@ async function getKm()
 		SELECT km
 		FROM data
 		ORDER BY km;
+	`;
+	return (await fetchAll(db, sql));
+}
+
+async function getPrice()
+{
+	const sql = `
+		SELECT price
+		FROM data
+		ORDER BY price;
 	`;
 	return (await fetchAll(db, sql));
 }
