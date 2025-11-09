@@ -1,35 +1,9 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
-// import { regSchema, insertSchema, amendSchema, pieSchema, barSchema, scatterSchema, userdataSchema, userpieSchema, userlineSchema, userwinSchema, usertableSchema, deleteSchema } from './dataSchema.mjs'
-import { barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
+import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
 
 export default async function dataRoutes(fast, options)
-{		
-	// // delete user stats data
-	// fast.delete('/remove', { schema: deleteSchema }, async function(request, reply) {
-	// 	console.log("in delete id")
-	// 	try {
-	// 		// const id = Number(request.params.id);
-	// 		const resAuth = await fetch('http://auth:443/me', {method: 'GET', headers: request.headers});
-	// 		const data = await resAuth.json();
-	// 		if (!resAuth.ok)
-	// 			return (reply.code(400).send({error: 'Not authorized'}));
-	// 		console.log("auth done")
-	// 		let sql = `UPDATE game SET player1 = ? WHERE userid1 = ?`;
-	// 		const exec1 = await execute(db, sql, ["none", data.id]);
-	// 		console.log("execute userid1", exec1);
-	// 		sql = `UPDATE game SET player2 = ? WHERE userid2 = ?`;
-	// 		const exec2 = await execute(db, sql, ["none", data.id]);
-	// 		sql = `UPDATE game SET winner = ? WHERE winnerid = ?`;  // ******* amended here *******///
-	// 		await execute(db, sql, ["none", data.id]); // ******* amended here *******///
-	// 		console.log("execute userid2", exec2);
-	// 		return(reply.code(200).send({message:"Id deleted in stats"}));
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 		reply.code(500).send({error: "deleting userID stats failed"});
-	// 	}
-	// })
-
+{
 	// route to insert data from loading
 	fast.post('/insert', { schema: insertSchema }, async function(request, reply)
 	{			
@@ -43,49 +17,7 @@ export default async function dataRoutes(fast, options)
 			console.error(err);
 			reply.code(500).send({ error: "Insertion failed" });
 		}		
-	});	
-
-	// fast.patch('/:userid/amend', { schema: amendSchema }, async function(request, reply)
-	// {		
-	// 	try	{
-	// 		const userid = Number(request.params.userid);
-	// 		const { newAlias } = request.body;
-	// 		console.log("From settings to stats.db: " + userid + " - " + newAlias);
-	// 		await amendAlias(userid, newAlias);
-	// 		reply.code(200).send({ message: "Alias amended in stats.db" });
-	// 	}
-	// 	catch (err)	{
-	// 		console.error(err);
-	// 		reply.code(500).send({ error: "Amending failed" });
-	// 	}		
-	// });
-
-
-
-	// // route to create the pie chart form db/game of the selected customization 
-	// fast.get('/pie', { schema: pieSchema }, async function (request, reply)
-	// {		
-	// 	try {		
-	// 		const speedy = await getCustom("speedy");
-	// 		const paddy = await getCustom("paddy");
-	// 		const wally = await getCustom("wally");
-	// 		const mirry = await getCustom("mirry");
-	// 		const multy = await getCustom("multy");
-	// 		const std = await getStandard();
-	// 		const data = {
-	// 			labels: ['Standard', 'Speedy', 'Paddy', 'Wally', 'Mirry', 'Multy'],
-	// 			values: [std?.[0]?.total ?? 0, speedy?.[0]?.total ?? 0, paddy?.[0]?.total ?? 0, wally?.[0]?.total ?? 0,	mirry?.[0]?.total ?? 0,	multy?.[0]?.total ?? 0]
-	// 		};
-	// 		reply.code(200).send(data);
-	// 	}
-	// 	catch (err)	{
-	// 		console.error(err);
-	// 		reply.code(500).send({ error: "Get data from game to pie chart failed" });
-	// 	}
-	// });
-
-	/************************************** */
-
+	});
 
 	// route to create a bar chart form db/game of the rank
 	fast.get('/bar', { schema: barSchema }, async function (request, reply)
@@ -108,8 +40,6 @@ export default async function dataRoutes(fast, options)
 			reply.code(500).send({ error: "Get data from game to bar chart failed" });
 		}
 	});	
-	
-	
 
 	// route to create a scatter chart form db/data of the km vs price
 	fast.get('/scatter', { schema: scatterSchema }, async function (request, reply)
@@ -127,7 +57,36 @@ export default async function dataRoutes(fast, options)
 			console.error(err);
 			reply.code(500).send({ error: "Get data to scatter chart failed" });
 		}
-	});	
+	});
+	
+	
+	// route to create a normalized scatter chart form db/data of the km vs price
+    fast.get('/norm', { schema: normSchema }, async function (request, reply)
+    {
+        try {
+            const points = await getPoints();
+            // const data = points.map(point => ({ x: point.km, y: point.price }));
+            const X = points.map(point => point.km);
+            const Y = points.map(point => point.price);
+			console.log(X);
+			console.log(Y);
+            const minX = X.length ? Math.min(...X) : 0;
+            const maxX = X.length ? Math.max(...X) : 0;
+            const minY = Y.length ? Math.min(...Y) : 0;
+            const maxY = Y.length ? Math.max(...Y) : 0;
+            const nX = X.map(x => (x - minX) / (maxX - minX));
+            const nY = Y.map(y => (y - minY) / (maxY - minY));
+			console.log(nX);
+			console.log(nY);
+            const data = nX.map((nx, i) => ( { x: nx, y: nY[i] }));
+			console.log(data);			
+            reply.code(200).send(data);
+        }
+        catch (err)    {
+            console.error(err);
+            reply.code(500).send({ error: "Get data to normalized scatter chart failed" });
+        }
+    });
 
 	// route to create a reg+scatter chart form db/data of the km vs price
 	fast.get('/reg', { schema: regSchema }, async function (request, reply)

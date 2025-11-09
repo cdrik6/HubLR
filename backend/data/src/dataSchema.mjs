@@ -131,6 +131,29 @@ export const scatterSchema = {
     }
 };
 
+export const normSchema = {    
+    response: {
+        200: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    x: { type: "number" },
+                    y: { type: "number" } 
+                },
+                required: ["x", "y"],
+                additionalProperties: false
+            }
+        },
+        500: {
+            type: "object",
+            properties: { error: { type: "string" } },
+            required: ["error"],
+            additionalProperties: false
+        }
+    }
+};
+
 export const regSchema = {    
     response: {
         200: {

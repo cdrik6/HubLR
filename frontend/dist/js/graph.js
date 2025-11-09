@@ -1,13 +1,15 @@
-let scatterContainer, regContainer, barContainer;
+let scatterContainer, regContainer, barContainer, normContainer;
 let canvasScatter, ctxScatter;
 let canvasReg, ctxReg;
 let canvasBar, ctxBar;
+let canvasNorm, ctxNorm;
 
 export function init()
 {
     scatterContainer = document.getElementById("scatter");
     regContainer = document.getElementById("reg");
     barContainer = document.getElementById("bar");
+    normContainer = document.getElementById("norm");
 
     canvasScatter = document.createElement("canvas");
     canvasScatter.width = 200;
@@ -27,9 +29,16 @@ export function init()
     barContainer.appendChild(canvasBar);
     ctxBar = canvasBar.getContext("2d");
 
+    canvasNorm = document.createElement("canvas");	
+    canvasNorm.width = 200;
+    canvasNorm.height = 200;
+    normContainer.appendChild(canvasNorm);
+    ctxNorm = canvasNorm.getContext("2d");
+
     drawScatter();
     drawReg();
     drawBar();
+    drawNorm();
 }
 
 export function cleanup()
@@ -127,7 +136,7 @@ function drawReg()
                     maintainAspectRatio: true,
                     plugins: {
                         legend: { display: false },
-                        title: { display: true,	text: 'km vs price'	}
+                        title: { display: true,	text: 'Linear Regression (km vs price)'	}
                     },
                     scales: {						
                         x: { title: { display: true, text: 'km' } },
@@ -173,4 +182,46 @@ function drawBar()
 			});		
   	})
 	.catch(err => { console.error("Bar chart failed: ", err); });
+}
+
+
+// Normalized
+function drawNorm()
+{    
+    if (!ctxNorm) throw new Error("Cannot get naormlized Scatter canvas context");
+    fetch(`/api/data/norm`, { method: 'GET' })
+    .then(res => {
+        if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
+        return (res.json());
+    })
+    .then(function(data)
+    {	
+        console.log("Normalized data:", data);
+        new Chart(ctxNorm,
+            {
+                type: 'scatter',
+                data: {					
+                    datasets: [
+                        {
+                            label: 'km vs price',
+                            data: data,
+                            backgroundColor: 'rgb(54, 162, 235)'
+                        }
+                    ]
+                },
+                options: {					
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true,	text: 'km vs price normalized'	}
+                    },
+                    scales: {						
+                        x: { title: { display: true, text: 'km' } },
+                        y: { title: { display: true, text: 'price' } }
+                    }
+                }
+            });		
+    })
+    .catch(err => { console.error("Normalized Scatter chart failed: ", err); });
 }

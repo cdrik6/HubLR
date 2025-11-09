@@ -220,3 +220,12 @@ So the rule of thumb is:
 > If you need `import` or `export`, use `type="module"` **and** `window.navigate = navigate;`
 
 ---------------------------------------
+
+Pourquoi il faut normaliser  / standardiser ?
+La distance entre 2 points d^2 = (x1 - x2)^2 + (y1 - y2)^2
+On fait une addition entre des choux x et des carottes y.
+Si x c'est une taille en mm, et y du poids en tonne, un petit ecart de taille 3 mm p.e. va ecraser un ecart
+de 10kg = 0.01 t -> 3*3 = 9 + 0.0001
+https://www.youtube.com/watch?v=Y7m9MyPxcyQ
+
+----------------------------------------
