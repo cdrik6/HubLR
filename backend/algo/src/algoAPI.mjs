@@ -1,8 +1,8 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
-import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
+import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './algoSchema.mjs'
 
-export default async function dataRoutes(fast, options)
+export default async function algoRoutes(fast, options)
 {
 	// route to insert data from loading
 	fast.post('/insert', { schema: insertSchema }, async function(request, reply)
@@ -148,11 +148,8 @@ export default async function dataRoutes(fast, options)
 	fast.get('/reg', { schema: regSchema }, async function (request, reply)
 	{		
 		try {					
-			const points = await getPoints();
-			const datapoints = points.map(point => ({ x: point.km, y: point.price }));			
-			// const res = await fetch("http://data/norm", { method: 'GET' })
-			// if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
-			// const datapoints = await res.json();
+			const points = await getPoints();			
+			const datapoints = points.map(point => ({ x: point.km, y: point.price }));
 			const X = datapoints.map(point => point.x);
 			const Y = datapoints.map(point => point.y);			
 			const mX = mean(X);
@@ -170,9 +167,8 @@ export default async function dataRoutes(fast, options)
 				m = covXY / varX;
 			else
 				m = 0;
-			console.log("m = " + m);
+			console.log(m);
 			const p = mY - m * mX;
-			console.log("p = " + p);
 			const minX = X.length ? Math.min(...X) : 0;
 			const maxX = X.length ? Math.max(...X) : 0;
 			const dataline = [{ x: minX, y: m * minX + p },{ x: maxX, y: m * maxX + p}];
@@ -386,8 +382,8 @@ export default async function dataRoutes(fast, options)
 
 async function insertData(data)
 {
-	const sql = `INSERT INTO data (km, price) VALUES (?, ?)`;
-	await execute(db, sql, [data.km, data.price]);
+	const sql = `INSERT INTO data (m, p) VALUES (?, ?)`;
+	await execute(db, sql, [data.m, data.p]);
 }
 
 async function getAllData()

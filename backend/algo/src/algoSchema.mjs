@@ -165,8 +165,8 @@ export const regSchema = {
                     items: {
                         type: "object",
                         properties: {
-                            x: { type: "number" },
-                            y: { type: "number" } 
+                            x: { type: "integer" },
+                            y: { type: "integer" } 
                         },
                         required: ["x", "y"],    
                         additionalProperties: false
@@ -177,8 +177,8 @@ export const regSchema = {
                     items: {
                         type: "object",
                         properties: {
-                            x: { type: "number" },
-                            y: { type: "number" } 
+                            x: { type: "integer" },
+                            y: { type: "integer" } 
                         },
                         required: ["x", "y"],    
                         additionalProperties: false    
