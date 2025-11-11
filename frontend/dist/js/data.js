@@ -86,7 +86,7 @@ async function handleLoadData()
     await loadData(km, price);    
   }
 
-  // loadBtn.style.display = "none";
+  showMessage("Data loaded." + rows, "load");  
   rawdata = null;
 }
 
