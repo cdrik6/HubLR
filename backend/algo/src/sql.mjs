@@ -27,7 +27,7 @@ export async function execute(db, sql, params = [])
     }));
 }
 
-// Get all rows from the db
+// Get all rows from the db, returns an array of all rows
 export async function fetchAll(db, sql, params)
 {
     return (new Promise(function(resolve, reject)
@@ -40,10 +40,25 @@ export async function fetchAll(db, sql, params)
                 resolve(rows);
         });
     }));
-};
+}
 
-// Get the first matching row from the db
-export async function fetchFirst(db, sql, params)
+// // Get the first matching row from the db [ {} ]
+// export async function fetchFirst(db, sql, params)
+// {
+//     return (new Promise(function(resolve, reject)
+//     {
+//         db.get(sql, params, function(error, row)
+//         {
+//             if (error)
+//                 reject(error);
+//             else
+//                 resolve(row);
+//         });
+//     }));
+// }
+
+// Get one element of the db, returns a single row object {}
+export async function fetchOne(db, sql, params)
 {
     return (new Promise(function(resolve, reject)
     {
@@ -55,9 +70,7 @@ export async function fetchFirst(db, sql, params)
                 resolve(row);
         });
     }));
-};
-
-
+}
 
 // Tool // The maximum is inclusive and the minimum is inclusive
 export function getRandIntInc(min, max)

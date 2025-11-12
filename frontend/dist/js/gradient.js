@@ -13,7 +13,7 @@ export function init()
     algoContainer.appendChild(canvasAlgo);
     ctxAlgo = canvasAlgo.getContext("2d");
 
-    drawAlgo();
+    // drawAlgo();
 }
 
 export function cleanup()
@@ -32,6 +32,7 @@ async function runAlgo()
         }
         const data = await res.json();	
 		console.log("Gradient response:", data);
+        drawAlgo();
     }
     catch (error) {
         console.error("Gradient failed: ", error);
@@ -46,7 +47,7 @@ async function drawAlgo()
         throw new Error("Cannot get Algo canvas context");
     //
     try {
-        const res = await fetch(`/api/data/scatter`, { method: 'GET' })        
+        const res = await fetch(`/api/data/scatter`, { method: 'GET' })
         if (!res.ok) {
             throw new Error(`HTTP error status: ${res.status}`);
         }
@@ -55,18 +56,18 @@ async function drawAlgo()
     catch (error) {
         console.error("Algo scatter chart failed: ", error);
     }
-    // //
-    // try {
-    //     const res = await fetch(`/api/data/reg`, { method: 'GET' })        
-    //     if (!res.ok) {
-    //         throw new Error(`HTTP error status: ${res.status}`);
-    //     }
-    //     const datapoints = await res.json();
-    // }
-    // catch (error) {
-    //     console.error("Algo chart failed: ", error);
-    // }
-    dataline = [];    
+    //
+    try {
+        const res = await fetch(`/api/algo/coef`, { method: 'GET' })
+        if (!res.ok) {
+            throw new Error(`HTTP error status: ${res.status}`);
+        }
+        dataline = await res.json();
+    }
+    catch (error) {
+        console.error("Get line failed: ", error);
+    }
+    // dataline = [];    
     
     new Chart(ctxAlgo,
         {

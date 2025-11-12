@@ -1,6 +1,6 @@
 import fastify from 'fastify';
 import sqlite3 from 'sqlite3';
-import { execute, getRandIntInc } from './sql.mjs';
+import { execute } from './sql.mjs';
 
 const fast = fastify({ logger: true });
 const PORT = 80;
@@ -113,7 +113,7 @@ async function getNormData()
 	catch(err) { console.error(err); };		
 }
 
-async function getRawData()
+export async function getRawData()
 {	
 	try {
 		const res = await fetch("http://data/scatter", { method: 'GET' })

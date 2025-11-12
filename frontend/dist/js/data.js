@@ -86,7 +86,7 @@ async function handleLoadData()
     await loadData(km, price);    
   }
 
-  showMessage("Data loaded." + rows, "load");  
+  showMessage("Data loaded.", "load");
   rawdata = null;
 }
 
