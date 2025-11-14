@@ -1,4 +1,5 @@
-import { db, gradient, getRawData } from './server.mjs'
+import { db } from './server.mjs'
+import { gradient, getRawData } from './algo.mjs'
 import { fetchOne } from './sql.mjs';
 // import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './algoSchema.mjs'
 

@@ -4,7 +4,7 @@ let algoContainer, canvasAlgo, ctxAlgo;
 export function init()
 {  
     algoBtn = document.getElementById("algoBtn");  
-    algoBtn.addEventListener("click", runAlgo);
+    algoBtn.addEventListener("click", startAlgo);
 
     algoContainer = document.getElementById("algo");
     canvasAlgo = document.createElement("canvas");	
@@ -18,9 +18,14 @@ export function init()
 
 export function cleanup()
 {    
-    algoBtn?.removeEventListener("click", runAlgo);
+    algoBtn?.removeEventListener("click", startAlgo);
     algoBtn = null;
     algoContainer = canvasAlgo = ctxAlgo = null;    
+}
+
+async function startAlgo()
+{
+    drawAlgo({ start: "start" });
 }
 
 async function runAlgo()
@@ -32,14 +37,14 @@ async function runAlgo()
         }
         const data = await res.json();	
 		console.log("Gradient response:", data);
-        drawAlgo();
+        drawFinal();
     }
     catch (error) {
         console.error("Gradient failed: ", error);
     }
 }
 
-async function drawAlgo()
+async function drawFinal()
 {    
     let datapoints, dataline;
 
@@ -105,4 +110,46 @@ async function drawAlgo()
         });  
     
     
+}
+
+
+async function drawAlgo(mode)
+{  		
+    // WebSocket
+    const clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);
+
+    clt_wskt.addEventListener('open', () => {	
+        console.log('Connected to Algo WebSocket\n');
+        // pong = setInterval( () => {	clt_wskt.send(JSON.stringify({ ping: "Pong is alive" })); }, 30000);        
+        clt_wskt.send(JSON.stringify(mode));	
+    });
+
+    clt_wskt.addEventListener('error', err => {
+        console.error('Error: ' + err + '\n');
+    });
+
+    clt_wskt.addEventListener('close', () => {
+        // clearInterval(pong);
+        console.log('Algo WebSocket closed\n');		
+        // resolve("Game Over");
+    });
+
+    clt_wskt.addEventListener('message', srv_msg => {
+        try	{
+            const data = JSON.parse(srv_msg.data);
+            if ('m' in data && 'p' in data)
+            {
+                // draw(data);
+                // if ('winner' in data && data.winner != "")
+                // {						
+                //     output.textContent = 'Game over: ' + data.winner + ' won!';
+                //     clt_wskt.send(JSON.stringify(end));
+                // }
+            }	            
+        }
+        catch (e) {
+            console.error('Invalid JSON received: ', srv_msg.data);
+        }		
+    });
+
 }

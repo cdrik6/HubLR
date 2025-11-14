@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { WebSocketServer } from 'ws';
 import http from 'http';
 const fast = fastify({ logger: true });
-const PORT = 80;
+const PORT = 443;
 const HOST = '0.0.0.0';
 
 import { execute } from './sql.mjs';
@@ -42,7 +42,7 @@ fast.ready().then(() => {
     });	
     
     // bind websocketserver to the http server
-    const srv_wskt = new WebSocketServer({ server, path:'/algo' });
+    const srv_wskt = new WebSocketServer({ server, path:'/lines' });
 	
     srv_wskt.on('connection', (clt_skt) => {		
 
