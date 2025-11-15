@@ -107,8 +107,7 @@ async function drawFinal()
                     y: { title: { display: true, text: 'price' } }
                 }
             }
-        });  
-    
+        });      
     
 }
 

@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { WebSocketServer } from 'ws';
 import http from 'http';
 const fast = fastify({ logger: true });
-const PORT = 443;
+const PORT = 8082;
 const HOST = '0.0.0.0';
 
 import { execute } from './sql.mjs';

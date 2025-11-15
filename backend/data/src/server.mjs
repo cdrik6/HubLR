@@ -3,7 +3,7 @@ import sqlite3 from 'sqlite3';
 import { execute, getRandIntInc } from './sql.mjs';
 
 const fast = fastify({ logger: true });
-const PORT = 80;
+const PORT = 8081;
 const HOST = '0.0.0.0';
 
 import dataRoutes from './dataAPI.mjs';
