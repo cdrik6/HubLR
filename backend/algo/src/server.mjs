@@ -1,18 +1,15 @@
 import Fastify from 'fastify';
 import { WebSocketServer } from 'ws';
-// import http from 'http';
-const fast = Fastify({ logger: true });
-const PORT = 8082;
+import algoRoutes from './algoAPI.mjs';
+
+const fastify = Fastify({ logger: true });
+const PORT = 5000;
 const HOST = '0.0.0.0';
 
-import algoRoutes from './algoAPI.mjs';
-// For the API, ensures routes are registered before the server is ready
-await fast.register(algoRoutes);
+await fastify.register(algoRoutes);
+await fastify.ready();
 
-
-await fast.ready();
-
-const server = fast.server;
+const server = fastify.server;
 const srv_wskt = new WebSocketServer({ server, path:'/lines' });
 
 srv_wskt.on('connection', (clt_skt) => {
@@ -45,7 +42,7 @@ srv_wskt.on('connection', (clt_skt) => {
 });
 
 try	{
-	await fast.listen({ port: PORT, host: HOST });
+	await fastify.listen({ port: PORT, host: HOST });
 	console.log("Server algo listening on port: " + PORT);
 }
 catch (err) {

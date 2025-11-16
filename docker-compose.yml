@@ -8,9 +8,8 @@ services:
     image: gateway
     container_name: gateway
     restart: on-failure
-    ports:
-      # - "80:80"
-      - "4443:443"
+    ports:      
+      - "3000:443"
     networks:
       - gradient
 

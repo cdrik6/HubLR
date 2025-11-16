@@ -1,17 +1,26 @@
-import fastify from 'fastify';
+import Fastify from 'fastify';
 import sqlite3 from 'sqlite3';
-import { execute, getRandIntInc } from './sql.mjs';
+import { execute } from './sql.mjs';
+import dataRoutes from './dataAPI.mjs';
 
-const fast = fastify({ logger: true });
-const PORT = 8081;
+const fastify = Fastify({ logger: true });
+const PORT = 5000;
 const HOST = '0.0.0.0';
 
-import dataRoutes from './dataAPI.mjs';
-// For the API, ensures routes are registered before the server is ready
-await fast.register(dataRoutes);
+await fastify.register(dataRoutes);
+await fastify.ready();
 
+try	{
+    await fastify.listen({ port: PORT, host: HOST });
+    console.log("Server data listening on port: " + PORT);
+}
+catch (err) {
+    console.error("Error starting server data: ", err);
+    process.exit(1); 
+}
+
+// Database data
 const db = new sqlite3.Database('data.db'); // default sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
-
 async function set_db()
 {
 	try {
@@ -30,18 +39,4 @@ async function set_db()
     }    
 }
 set_db();
-
 export { db };
-
-async function listening()
-{
- 	try	{
-    	await fast.listen({ port: PORT, host: HOST });
-		console.log("Server data listening on port: " + PORT);
- 	}
-	catch (err) {
-    	console.error("Error starting server data: ", err);
-    	process.exit(1); 
-  	}
-}
-listening();
