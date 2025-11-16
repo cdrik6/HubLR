@@ -116,10 +116,13 @@ async function drawAlgo(mode)
 {  		
     // WebSocket
     const clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);
+    // let ping;
 
     clt_wskt.addEventListener('open', () => {	
         console.log('Connected to Algo WebSocket\n');
-        // pong = setInterval( () => {	clt_wskt.send(JSON.stringify({ ping: "Pong is alive" })); }, 30000);        
+        // ping = setInterval( () => {
+        //     clt_wskt.send(JSON.stringify({ pong: "ping" }));
+        // }, 30000);
         clt_wskt.send(JSON.stringify(mode));	
     });
 
@@ -128,7 +131,7 @@ async function drawAlgo(mode)
     });
 
     clt_wskt.addEventListener('close', () => {
-        // clearInterval(pong);
+        // clearInterval(ping);
         console.log('Algo WebSocket closed\n');		
         // resolve("Game Over");
     });
