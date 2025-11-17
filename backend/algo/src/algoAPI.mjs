@@ -6,23 +6,23 @@ import { fetchOne } from './sql.mjs';
 
 /********** SCHEMA TO DO ********************************* */
 
-export default async function algoRoutes(fast, options)
+export default async function algoRoutes(fastify, options)
 {
-	// route to run gradient algo
-	fast.post('/gradient', /*{ schema: insertSchema }, */async function(request, reply)
-	{			
-		try	{			
-			const k = await gradient(0.1);
-			reply.code(200).send({ message: "Gradient done: " + k });
-		}
-		catch (err)	{
-			console.error(err);
-			reply.code(500).send({ error: "Gradient failed" });
-		}		
-	});
+	// // route to run gradient algo with fetch method instead of ws
+	// fastify.post('/gradient', /*{ schema: insertSchema }, */async function(request, reply)
+	// {			
+	// 	try	{			
+	// 		const k = await gradient(0.1);
+	// 		reply.code(200).send({ message: "Gradient done: " + k });
+	// 	}
+	// 	catch (err)	{
+	// 		console.error(err);
+	// 		reply.code(500).send({ error: "Gradient failed" });
+	// 	}		
+	// });
 
 	// route to create a reg+scatter chart form db/data of the km vs price
-	fast.get('/coef', /*{ schema: regSchema }, */async function (request, reply)
+	fastify.get('/coef', /*{ schema: regSchema }, */async function (request, reply)
 	{		
 		try {					
 			const coef = await getLastCoef();

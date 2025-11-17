@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { WebSocketServer } from 'ws';
 import algoRoutes from './algoAPI.mjs';
+import { gradient }  from './algo.mjs';
 
 const fastify = Fastify({ logger: true });
 const PORT = 5000;
@@ -21,10 +22,13 @@ srv_wskt.on('connection', (clt_skt) => {
 	});		
 	clt_skt.on('message', async (clt_msg) => {           
 		console.log('Server algo received:', clt_msg.toString());
-		const data = JSON.parse(clt_msg);
-		try {					
-			// if ('nbPlayers' in data && 'options'in data && 'user'in data)
-			// 	ModeInData(clt_skt, data);				
+		const data = JSON.parse(clt_msg);		
+		try {								
+			if ('start' in data)
+			{
+				const k = await gradient(clt_skt, 0.1);
+				clt_skt.send(JSON.stringify({k: k}));	
+			}
 			// else if ('p1' in data && 'p2' in data)				
 			// 	PaddleInData(clt_skt, data);				
 			// else if ('start' in data)									
@@ -33,7 +37,7 @@ srv_wskt.on('connection', (clt_skt) => {
 			// 	await EndInData(clt_skt, false);					
 		}
 		catch (e) {
-			console.error('Invalid JSON from client');
+			console.error('Invalid JSON from client: ' + e);
 		}
 	});
 	clt_skt.on('close', (code, reason) => {

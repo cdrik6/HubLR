@@ -2,10 +2,10 @@ import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
 import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
 
-export default async function dataRoutes(fast, options)
+export default async function dataRoutes(fastify, options)
 {
 	// route to insert data from loading
-	fast.post('/insert', { schema: insertSchema }, async function(request, reply)
+	fastify.post('/insert', { schema: insertSchema }, async function(request, reply)
 	{			
 		try	{
 			const { km, price } = request.body;
@@ -20,7 +20,7 @@ export default async function dataRoutes(fast, options)
 	});
 
 	// route to create a bar km chart form db/game of the rank
-	fast.get('/barkm', { schema: barSchema }, async function (request, reply)
+	fastify.get('/barkm', { schema: barSchema }, async function (request, reply)
 	{		
 		try {								
 			const kms = await getKm();
@@ -59,7 +59,7 @@ export default async function dataRoutes(fast, options)
 	});	
 
 	// route to create a bar price chart form db/game of the rank
-	fast.get('/barprice', { schema: barSchema }, async function (request, reply)
+	fastify.get('/barprice', { schema: barSchema }, async function (request, reply)
 	{		
 		try {								
 			const prices = await getPrice();
@@ -98,7 +98,7 @@ export default async function dataRoutes(fast, options)
 	});	
 
 	// route to create a scatter chart form db/data of the km vs price
-	fast.get('/scatter', { schema: scatterSchema }, async function (request, reply)
+	fastify.get('/scatter', { schema: scatterSchema }, async function (request, reply)
 	{		
 		try {					
 			const points = await getPoints();
@@ -117,7 +117,7 @@ export default async function dataRoutes(fast, options)
 	
 	
 	// route to create a normalized scatter chart form db/data of the km vs price
-    fast.get('/norm', { schema: normSchema }, async function (request, reply)
+    fastify.get('/norm', { schema: normSchema }, async function (request, reply)
     {
         try {
             const points = await getPoints();
@@ -145,7 +145,7 @@ export default async function dataRoutes(fast, options)
     });
 
 	// route to create a reg+scatter chart form db/data of the km vs price
-	fast.get('/reg', { schema: regSchema }, async function (request, reply)
+	fastify.get('/reg', { schema: regSchema }, async function (request, reply)
 	{		
 		try {					
 			const points = await getPoints();
