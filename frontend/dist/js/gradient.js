@@ -1,33 +1,37 @@
 let algoBtn;
 let algoContainer, canvasAlgo, ctxAlgo;
 let algoChart;
+let clt_wskt = null;
+let ping = null;
 
 export function init()
 {  
+    set_wskt();
+
     algoBtn = document.getElementById("algoBtn");  
-    algoBtn.addEventListener("click", startAlgo);
+    algoBtn.addEventListener("click", launchAlgo);
 
     algoContainer = document.getElementById("algo");
     canvasAlgo = document.createElement("canvas");	
     canvasAlgo.width = 200;
     canvasAlgo.height = 200;
     algoContainer.appendChild(canvasAlgo);
-    ctxAlgo = canvasAlgo.getContext("2d");    
-
-    drawAlgo();
+    ctxAlgo = canvasAlgo.getContext("2d");
+    drawAlgo();    
 }
 
 export function cleanup()
 {    
-    algoBtn?.removeEventListener("click", startAlgo);
+    algoBtn?.removeEventListener("click", launchAlgo);
     algoBtn = null;
     algoContainer = canvasAlgo = ctxAlgo = null;    
-    algoChart = null;
-}
-
-async function startAlgo()
-{
-    launchAlgo({ start: "start" });
+    algoChart?.destroy();
+    algoChart = null;    
+    if (clt_wskt && clt_wskt.readyState === WebSocket.OPEN)				
+		clt_wskt.close(1000, "Cleaning");
+    clt_wskt = null;
+    clearInterval(ping);
+    ping = null;
 }
 
 async function drawAlgo()
@@ -36,33 +40,22 @@ async function drawAlgo()
 
     if (!ctxAlgo)
         throw new Error("Cannot get Algo context");
-    //
     try {
         const res = await fetch(`/api/data/reg`, { method: 'GET' })
         if (!res.ok) {
             throw new Error(`HTTP error status: ${res.status}`);
         }
         ({ datapoints, dataline } = await res.json());
-        console.log(dataline);
+        // console.log(dataline);
     }
     catch (error) {
         console.error("Algo chart failed: ", error);
     }
-    // //
-    // try {
-    //     const res = await fetch(`/api/algo/coef`, { method: 'GET' })
-    //     if (!res.ok) {
-    //         throw new Error(`HTTP error status: ${res.status}`);
-    //     }
-    //     dataline = await res.json();
-    // }
-    // catch (error) {
-    //     console.error("Get line failed: ", error);
-    // }
-    // dataline = [];    
-
-    datagradient = [{ x: 0, y: 0 },{ x: 0, y: 0}];
+    datagradient = [{ x: 0, y: 0 }, { x: 0, y: 0}];
     
+    if (algoChart)
+        algoChart.destroy();
+
     algoChart = new Chart(ctxAlgo,
         {
             type: 'scatter',
@@ -79,7 +72,7 @@ async function drawAlgo()
                         data: datagradient,                        
                         borderColor: 'red',
                         borderWidth: 2,
-                        pointRadius: 0, // hide points
+                        pointRadius: 0,
                         fill: false
                     },
                     {
@@ -87,8 +80,8 @@ async function drawAlgo()
                         type: 'line',
                         data: dataline,                        
                         borderColor: 'green',
-                        borderWidth: 4,
-                        pointRadius: 0, // hide points
+                        borderWidth: 2,
+                        pointRadius: 0,
                         fill: false
                     }
                 ]
@@ -101,29 +94,27 @@ async function drawAlgo()
                     title: { display: true,	text: 'To Linear Regression (km vs price)'	}
                 },
                 scales: {						
-                    x: { title: { display: true, text: 'km' } },
-                    y: { title: { display: true, text: 'price' } }
+                    x: { title: { display: true, text: 'km' }, min: 0 },
+                    y: { title: { display: true, text: 'price' }, min: 0 }
                 }
             }
-        });      
-    
+        });    
 }
 
+function launchAlgo()
+{
+    clt_wskt.send(JSON.stringify({ start: "start" }));
+}
 
-async function launchAlgo(mode)
-{  		
-    // WebSocket
-    const clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);
-    let ping;
+// WebSocket
+function set_wskt()
+{    
+    clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);    
 
     clt_wskt.addEventListener('open', () => {	
         console.log('Connected to Algo WebSocket\n');
-        ping = setInterval( () => {
-            clt_wskt.send(JSON.stringify({ pong: "ping" }));
-        }, 30000);
-        clt_wskt.send(JSON.stringify(mode));	
-        // algoChart.data.datasets[2].data = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
-        // algoChart.update();
+        ping = setInterval(() => { clt_wskt.send(JSON.stringify({ pong: "ping" })); }, 30000);
+        // clt_wskt.send(JSON.stringify({ start: "start" }));	        
     });
 
     clt_wskt.addEventListener('error', err => {
@@ -132,8 +123,7 @@ async function launchAlgo(mode)
 
     clt_wskt.addEventListener('close', () => {
         clearInterval(ping);
-        console.log('Algo WebSocket closed\n');		
-        // resolve("Game Over");
+        console.log('Algo WebSocket closed\n');		        
     });
 
     clt_wskt.addEventListener('message', srv_msg => {
@@ -149,68 +139,66 @@ async function launchAlgo(mode)
                 algoChart.update();
             }	            
             else if ('k' in data)            
-                console.log("k = " + data.k);            
+                console.log("k = " + data.k);
         }
         catch (err) {
             console.error('Invalid JSON received: ', err);
         }		
     });
-
 }
 
-function drawReg()
-{
-    // const canvasReg = document.createElement("canvas");	
-    // canvasReg.width = 200;
-    // canvasReg.height = 200;
-    // regContainer.appendChild(canvasReg);
-    // const ctxReg = canvasReg.getContext("2d");
-    if (!ctxAlgo) throw new Error("Cannot get Algo context");
-    fetch(`/api/data/reg`, { method: 'GET' })
-    .then(res => {
-        if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
-        return (res.json());
-    })
-    .then(function({ datapoints, dataline })
-    {	
-        regChart = new Chart(ctxAlgo,
-            {
-                type: 'scatter',
-                data: {					
-                    datasets: [
-                        {
-                            label: 'km vs price',                        
-                            data: datapoints,
-                            backgroundColor: 'rgb(54, 162, 235)'
-                        },
-                        {
-                            label: 'Regression Line',
-                            type: 'line',
-                            data: dataline,                        
-                            borderColor: 'green',
-                            borderWidth: 2,
-                            pointRadius: 0, // hide points
-                            fill: false
-                        }
-                    ]
-                },
-                options: {					
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false },
-                        title: { display: true,	text: 'Linear Regression (km vs price)'	}
-                    },
-                    scales: {						
-                        x: { title: { display: true, text: 'km' } },
-                        y: { title: { display: true, text: 'price' } }
-                    }
-                }
-            });		
-    })
-    .catch(err => { console.error("Reg chart failed: ", err); });
-}
-
+// function drawReg()
+// {
+//     // const canvasReg = document.createElement("canvas");	
+//     // canvasReg.width = 200;
+//     // canvasReg.height = 200;
+//     // regContainer.appendChild(canvasReg);
+//     // const ctxReg = canvasReg.getContext("2d");
+//     if (!ctxAlgo) throw new Error("Cannot get Algo context");
+//     fetch(`/api/data/reg`, { method: 'GET' })
+//     .then(res => {
+//         if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
+//         return (res.json());
+//     })
+//     .then(function({ datapoints, dataline })
+//     {	
+//         regChart = new Chart(ctxAlgo,
+//             {
+//                 type: 'scatter',
+//                 data: {					
+//                     datasets: [
+//                         {
+//                             label: 'km vs price',                        
+//                             data: datapoints,
+//                             backgroundColor: 'rgb(54, 162, 235)'
+//                         },
+//                         {
+//                             label: 'Regression Line',
+//                             type: 'line',
+//                             data: dataline,                        
+//                             borderColor: 'green',
+//                             borderWidth: 2,
+//                             pointRadius: 0, // hide points
+//                             fill: false
+//                         }
+//                     ]
+//                 },
+//                 options: {					
+//                     responsive: true,
+//                     maintainAspectRatio: true,
+//                     plugins: {
+//                         legend: { display: false },
+//                         title: { display: true,	text: 'Linear Regression (km vs price)'	}
+//                     },
+//                     scales: {						
+//                         x: { title: { display: true, text: 'km' } },
+//                         y: { title: { display: true, text: 'price' } }
+//                     }
+//                 }
+//             });		
+//     })
+//     .catch(err => { console.error("Reg chart failed: ", err); });
+// }
 
 
 // Launch algo and draw last reg line with fetch (only one) without ws
@@ -231,71 +219,71 @@ function drawReg()
 // }
 
 
-async function drawFinal()
-{    
-    let datapoints, dataline;
+// async function drawFinal()
+// {    
+//     let datapoints, dataline;
 
-    if (!ctxAlgo)
-        throw new Error("Cannot get Algo canvas context");
-    //
-    try {
-        const res = await fetch(`/api/data/scatter`, { method: 'GET' })
-        if (!res.ok) {
-            throw new Error(`HTTP error status: ${res.status}`);
-        }
-        datapoints = await res.json();
-    }
-    catch (error) {
-        console.error("Algo scatter chart failed: ", error);
-    }
-    // //
-    // try {
-    //     const res = await fetch(`/api/algo/coef`, { method: 'GET' })
-    //     if (!res.ok) {
-    //         throw new Error(`HTTP error status: ${res.status}`);
-    //     }
-    //     dataline = await res.json();
-    // }
-    // catch (error) {
-    //     console.error("Get line failed: ", error);
-    // }
-    // dataline = [];    
+//     if (!ctxAlgo)
+//         throw new Error("Cannot get Algo canvas context");
+//     //
+//     try {
+//         const res = await fetch(`/api/data/scatter`, { method: 'GET' })
+//         if (!res.ok) {
+//             throw new Error(`HTTP error status: ${res.status}`);
+//         }
+//         datapoints = await res.json();
+//     }
+//     catch (error) {
+//         console.error("Algo scatter chart failed: ", error);
+//     }
+//     // //
+//     // try {
+//     //     const res = await fetch(`/api/algo/coef`, { method: 'GET' })
+//     //     if (!res.ok) {
+//     //         throw new Error(`HTTP error status: ${res.status}`);
+//     //     }
+//     //     dataline = await res.json();
+//     // }
+//     // catch (error) {
+//     //     console.error("Get line failed: ", error);
+//     // }
+//     // dataline = [];    
 
-    dataline = [{ x: 0, y: 0 },{ x: 0, y: 0}];			
+//     dataline = [{ x: 0, y: 0 },{ x: 0, y: 0}];			
     
-    regChart = new Chart(ctxAlgo,
-        {
-            type: 'scatter',
-            data: {					
-                datasets: [
-                    {
-                        label: 'km vs price',                        
-                        data: datapoints,
-                        backgroundColor: 'rgb(54, 162, 235)'
-                    },
-                    {
-                        label: 'Regression Line',
-                        type: 'line',
-                        data: dataline,                        
-                        borderColor: 'red',
-                        borderWidth: 2,
-                        pointRadius: 0, // hide points
-                        fill: false
-                    }
-                ]
-            },
-            options: {					
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: true,	text: 'Linear Regression (km vs price)'	}
-                },
-                scales: {						
-                    x: { title: { display: true, text: 'km' } },
-                    y: { title: { display: true, text: 'price' } }
-                }
-            }
-        });      
+//     regChart = new Chart(ctxAlgo,
+//         {
+//             type: 'scatter',
+//             data: {					
+//                 datasets: [
+//                     {
+//                         label: 'km vs price',                        
+//                         data: datapoints,
+//                         backgroundColor: 'rgb(54, 162, 235)'
+//                     },
+//                     {
+//                         label: 'Regression Line',
+//                         type: 'line',
+//                         data: dataline,                        
+//                         borderColor: 'red',
+//                         borderWidth: 2,
+//                         pointRadius: 0, // hide points
+//                         fill: false
+//                     }
+//                 ]
+//             },
+//             options: {					
+//                 responsive: true,
+//                 maintainAspectRatio: true,
+//                 plugins: {
+//                     legend: { display: false },
+//                     title: { display: true,	text: 'Linear Regression (km vs price)'	}
+//                 },
+//                 scales: {						
+//                     x: { title: { display: true, text: 'km' } },
+//                     y: { title: { display: true, text: 'price' } }
+//                 }
+//             }
+//         });      
     
-}
+// }

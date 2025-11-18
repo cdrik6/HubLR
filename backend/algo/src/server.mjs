@@ -27,14 +27,12 @@ srv_wskt.on('connection', (clt_skt) => {
 			if ('start' in data)
 			{
 				const k = await gradient(clt_skt, 0.1);
-				clt_skt.send(JSON.stringify({k: k}));	
-			}
-			// else if ('p1' in data && 'p2' in data)				
-			// 	PaddleInData(clt_skt, data);				
-			// else if ('start' in data)									
-			// 	StartInData(clt_skt);
-			// else if ('end' in data)									
-			// 	await EndInData(clt_skt, false);					
+				if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
+				{
+					clt_skt.send(JSON.stringify({k: k}));	
+					clt_skt.close(1000, "Reg over");
+				}	
+			}			
 		}
 		catch (e) {
 			console.error('Invalid JSON from client: ' + e);

@@ -133,7 +133,7 @@ function drawReg()
                             label: 'Regression Line',
                             type: 'line',
                             data: dataline,                        
-                            borderColor: 'red',
+                            borderColor: 'green',
                             borderWidth: 2,
                             pointRadius: 0, // hide points
                             fill: false
