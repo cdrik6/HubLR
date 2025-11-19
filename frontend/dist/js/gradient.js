@@ -1,6 +1,9 @@
 let algoBtn;
 let algoContainer, canvasAlgo, ctxAlgo;
 let algoChart;
+let mContainer, canvasM, ctxM;
+let pContainer, canvasP, ctxP;
+let mChart, pChart;
 let clt_wskt = null;
 let ping = null;
 
@@ -17,7 +20,21 @@ export function init()
     canvasAlgo.height = 200;
     algoContainer.appendChild(canvasAlgo);
     ctxAlgo = canvasAlgo.getContext("2d");
-    drawAlgo();    
+    drawAlgo();
+
+    mContainer = document.getElementById("mCoef");
+    canvasM = document.createElement("canvas");	
+    canvasM.width = 200;
+    canvasM.height = 200;
+    mContainer.appendChild(canvasM);
+    ctxM = canvasM.getContext("2d");
+
+    pContainer = document.getElementById("pCoef");
+    canvasP = document.createElement("canvas");	
+    canvasP.width = 200;
+    canvasP.height = 200;
+    pContainer.appendChild(canvasP);
+    ctxP = canvasP.getContext("2d");
 }
 
 export function cleanup()
@@ -131,7 +148,7 @@ function set_wskt()
             const data = JSON.parse(srv_msg.data);
             if ('m' in data && 'p' in data && 'maxX' in data && 'minX' in data)
             {
-                console.log("m = " + data.m + " p = " + data.p);                
+                // console.log("m = " + data.m + " p = " + data.p);                
                 algoChart.data.datasets[1].data = [
                     { x: data.minX, y: data.m * data.minX + data.p},
                     { x: data.maxX, y: data.m * data.maxX + data.p}
@@ -146,6 +163,27 @@ function set_wskt()
         }		
     });
 }
+
+
+async function drawM()
+{    
+    
+
+    if (!ctxM)
+        throw new Error("Can not get M context");
+    try {
+        const res = await fetch(`/api/algo/mss`, { method: 'GET' })
+        if (!res.ok) {
+            throw new Error(`HTTP error status: ${res.status}`);
+        }
+        // ({ datapoints, dataline } = await res.json());
+        // console.log(dataline);
+    }
+    catch (error) {
+        console.error("M chart failed: ", error);
+    }
+
+} 
 
 // function drawReg()
 // {

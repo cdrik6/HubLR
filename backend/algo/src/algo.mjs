@@ -38,14 +38,11 @@ export async function gradient(clt_skt, a)
         m = m - errM;
         rawP = (p - m * minX / (maxX - minX)) * (maxY - minY) + minY;
         rawM = m * (maxY - minY) / (maxX - minX);
-        console.log("P = " + rawP);
-        console.log("M = " + rawM);
-
-        //
-        // const frame = JSON.stringify({m: rawM, p: rawP});        
+        // console.log("P = " + rawP);
+        // console.log("M = " + rawM);
+        //        
         if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
             clt_skt.send(JSON.stringify({ m: rawM, p: rawP, maxX: maxX, minX: minX }));
-
         //
         await insertCoef(rawM, rawP);
         k++;
