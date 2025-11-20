@@ -26,8 +26,11 @@ export async function gradient(clt_skt, a)
     const maxY = Y.length ? Math.max(...Y) : 0;
     if (maxX === minX) // || maxY === minY)
         return (0);
-
     console.log(data.length);
+    // // 0
+    // if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
+    //         clt_skt.send(JSON.stringify({ m: rawM, p: rawP, maxX: maxX, minX: minX }));
+    // algo
     while ((Math.abs(errM) > 0.000001 || Math.abs(errP) > 0.000001) && k < 2000) /**************************stop infinite to check */
     {
         errP = (2 * a / data.length) * data.reduce((sum, { x, y }) => sum + m * x + p - y, 0);
@@ -42,7 +45,7 @@ export async function gradient(clt_skt, a)
         // console.log("M = " + rawM);
         //        
         if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
-            clt_skt.send(JSON.stringify({ m: rawM, p: rawP, maxX: maxX, minX: minX }));
+            clt_skt.send(JSON.stringify({ m: m, p: p, rawM: rawM, rawP: rawP, maxX: maxX, minX: minX }));
         //
         await insertCoef(rawM, rawP);
         k++;

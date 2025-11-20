@@ -1,9 +1,11 @@
 let algoBtn;
 let algoContainer, canvasAlgo, ctxAlgo;
-let algoChart;
-let mContainer, canvasM, ctxM;
-let pContainer, canvasP, ctxP;
-let mChart, pChart;
+let algoChart; algoMessage;
+let stepContainer, canvasStep, ctxStep;
+let stepChart;
+// let mContainer, canvasM, ctxM;
+// let pContainer, canvasP, ctxP;
+// let mChart, pChart;
 let clt_wskt = null;
 let ping = null;
 
@@ -21,29 +23,45 @@ export function init()
     algoContainer.appendChild(canvasAlgo);
     ctxAlgo = canvasAlgo.getContext("2d");
     drawAlgo();
+    algoMessage = document.getElementById("algoMessage");
 
-    mContainer = document.getElementById("mCoef");
-    canvasM = document.createElement("canvas");	
-    canvasM.width = 200;
-    canvasM.height = 200;
-    mContainer.appendChild(canvasM);
-    ctxM = canvasM.getContext("2d");
 
-    pContainer = document.getElementById("pCoef");
-    canvasP = document.createElement("canvas");	
-    canvasP.width = 200;
-    canvasP.height = 200;
-    pContainer.appendChild(canvasP);
-    ctxP = canvasP.getContext("2d");
+    // mContainer = document.getElementById("mCoef");
+    // canvasM = document.createElement("canvas");	
+    // canvasM.width = 200;
+    // canvasM.height = 200;
+    // mContainer.appendChild(canvasM);
+    // ctxM = canvasM.getContext("2d");
+
+    // pContainer = document.getElementById("pCoef");
+    // canvasP = document.createElement("canvas");	
+    // canvasP.width = 200;
+    // canvasP.height = 200;
+    // pContainer.appendChild(canvasP);
+    // ctxP = canvasP.getContext("2d");
+
+    stepContainer = document.getElementById("step");
+    canvasStep = document.createElement("canvas");	
+    canvasStep.width = 200;
+    canvasStep.height = 200;
+    stepContainer.appendChild(canvasStep);
+    ctxStep = canvasStep.getContext("2d");
+    drawStep();
 }
 
 export function cleanup()
 {    
     algoBtn?.removeEventListener("click", launchAlgo);
     algoBtn = null;
+    //
     algoContainer = canvasAlgo = ctxAlgo = null;    
     algoChart?.destroy();
-    algoChart = null;    
+    algoChart = algoMessage = null;
+    //
+    stepContainer = canvasStep = ctxStep = null;    
+    stepChart?.destroy();
+    stepChart = null;    
+    //
     if (clt_wskt && clt_wskt.readyState === WebSocket.OPEN)				
 		clt_wskt.close(1000, "Cleaning");
     clt_wskt = null;
@@ -104,6 +122,7 @@ async function drawAlgo()
                 ]
             },
             options: {					
+                animation: false,
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
@@ -120,7 +139,11 @@ async function drawAlgo()
 
 function launchAlgo()
 {
-    clt_wskt.send(JSON.stringify({ start: "start" }));
+    // algoBtn.style.display = 'none';
+    algoBtn?.removeEventListener("click", launchAlgo);
+    algoBtn = null;
+    algoMessage.textContent = "Running..."
+    clt_wskt.send(JSON.stringify({ start: "start" }));    
 }
 
 // WebSocket
@@ -150,13 +173,18 @@ function set_wskt()
             {
                 // console.log("m = " + data.m + " p = " + data.p);                
                 algoChart.data.datasets[1].data = [
-                    { x: data.minX, y: data.m * data.minX + data.p},
-                    { x: data.maxX, y: data.m * data.maxX + data.p}
+                    { x: data.minX, y: data.rawM * data.minX + data.rawP},
+                    { x: data.maxX, y: data.rawM * data.maxX + data.rawP}
                 ];
                 algoChart.update();
+                stepChart.data.datasets[0].data.push({ x: data.m, y: data.p });
+                stepChart.update();
             }	            
-            else if ('k' in data)            
+            else if ('k' in data)
+            {
                 console.log("k = " + data.k);
+                algoMessage.textContent = "Done!";
+            }                
         }
         catch (err) {
             console.error('Invalid JSON received: ', err);
@@ -164,26 +192,64 @@ function set_wskt()
     });
 }
 
+async function drawStep()
+{   
+    let datastep;
 
-async function drawM()
-{    
+    if (!ctxStep)
+        throw new Error("Can not get Step context");    
+    datastep = [{ x: 0, y: 0 }];
+    
+    if (stepChart)
+        stepChart.destroy();
+
+    stepChart = new Chart(ctxStep,
+        {
+            type: 'scatter',
+            data: {					
+                datasets: [
+                    {
+                        label: ' (m, p)',
+                        data: datastep,
+                        backgroundColor: 'red'
+                    }                    
+                ]
+            },
+            options: {
+                animation: false,					
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true,	text: 'Steps to minimize MSE'	}
+                },
+                scales: {						
+                    x: { title: { display: true, text: 'm' } },
+                    y: { title: { display: true, text: 'p' }, min: 0, max: 1 }
+                }
+            }
+        });
+}
+
+// async function drawM()
+// {    
     
 
-    if (!ctxM)
-        throw new Error("Can not get M context");
-    try {
-        const res = await fetch(`/api/algo/mss`, { method: 'GET' })
-        if (!res.ok) {
-            throw new Error(`HTTP error status: ${res.status}`);
-        }
-        // ({ datapoints, dataline } = await res.json());
-        // console.log(dataline);
-    }
-    catch (error) {
-        console.error("M chart failed: ", error);
-    }
+//     if (!ctxM)
+//         throw new Error("Can not get M context");
+//     try {
+//         const res = await fetch(`/api/algo/mss`, { method: 'GET' })
+//         if (!res.ok) {
+//             throw new Error(`HTTP error status: ${res.status}`);
+//         }
+//         // ({ datapoints, dataline } = await res.json());
+//         // console.log(dataline);
+//     }
+//     catch (error) {
+//         console.error("M chart failed: ", error);
+//     }
 
-} 
+// } 
 
 // function drawReg()
 // {
