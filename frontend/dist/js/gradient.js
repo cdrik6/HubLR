@@ -153,8 +153,7 @@ function set_wskt()
 
     clt_wskt.addEventListener('open', () => {	
         console.log('Connected to Algo WebSocket\n');
-        ping = setInterval(() => { clt_wskt.send(JSON.stringify({ pong: "ping" })); }, 30000);
-        // clt_wskt.send(JSON.stringify({ start: "start" }));	        
+        ping = setInterval(() => { clt_wskt.send(JSON.stringify({ pong: "ping" })); }, 30000);        
     });
 
     clt_wskt.addEventListener('error', err => {
@@ -180,10 +179,13 @@ function set_wskt()
                 stepChart.data.datasets[0].data.push({ x: data.m, y: data.p });
                 stepChart.update();
             }	            
-            else if ('k' in data)
+            else if ('k' in data && 'rawM' in data && 'rawP' in data && 'stop' in data)
             {
                 console.log("k = " + data.k);
-                algoMessage.textContent = "Done!";
+                if (data.stop === true)                
+                    algoMessage.textContent = "Limit reached!\nm = " + data.rawM + " p = " + data.rawP;                
+                else                
+                    algoMessage.textContent = "Done!\nm = " + data.rawM + " p = " + data.rawP;                
             }                
         }
         catch (err) {
