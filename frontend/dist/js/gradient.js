@@ -140,8 +140,8 @@ async function drawAlgo()
 function launchAlgo()
 {
     // algoBtn.style.display = 'none';
-    algoBtn?.removeEventListener("click", launchAlgo);
-    algoBtn = null;
+    // algoBtn?.removeEventListener("click", launchAlgo);
+    // algoBtn = null;
     algoMessage.textContent = "Running..."
     clt_wskt.send(JSON.stringify({ start: "start" }));    
 }
@@ -166,10 +166,10 @@ function set_wskt()
     });
 
     clt_wskt.addEventListener('message', srv_msg => {
-        try	{
-            const data = JSON.parse(srv_msg.data);
+        try	{            
+            const data = JSON.parse(srv_msg.data);            
             if ('m' in data && 'p' in data && 'maxX' in data && 'minX' in data)
-            {
+            {                
                 // console.log("m = " + data.m + " p = " + data.p);                
                 algoChart.data.datasets[1].data = [
                     { x: data.minX, y: data.rawM * data.minX + data.rawP},
@@ -180,13 +180,21 @@ function set_wskt()
                 stepChart.update();
             }	            
             else if ('k' in data && 'rawM' in data && 'rawP' in data && 'stop' in data)
-            {
+            {                
                 console.log("k = " + data.k);
                 if (data.stop === true)                
                     algoMessage.textContent = "Limit reached!\nm = " + data.rawM + " p = " + data.rawP;                
                 else                
                     algoMessage.textContent = "Done!\nm = " + data.rawM + " p = " + data.rawP;                
-            }                
+            }
+            else if ('isRunning' in data)
+            {
+                console.log("k = running");
+                algoMessage.textContent = "Wait please, gradient in progress";
+                // algoBtn = document.getElementById("algoBtn");  
+                // algoBtn.addEventListener("click", launchAlgo);
+            }    
+
         }
         catch (err) {
             console.error('Invalid JSON received: ', err);

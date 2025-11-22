@@ -12,6 +12,7 @@ await fastify.ready();
 
 const server = fastify.server;
 const srv_wskt = new WebSocketServer({ server, path:'/lines' });
+let isRunning = false;
 
 srv_wskt.on('connection', (clt_skt) => {
 	clt_skt.on('open', () => {
@@ -26,12 +27,23 @@ srv_wskt.on('connection', (clt_skt) => {
 		try {								
 			if ('start' in data)
 			{
-				const { k, rawM, rawP, stop } = await gradient(clt_skt);
-				if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
+				if (isRunning)
 				{
-					clt_skt.send(JSON.stringify({ k: k, rawM: rawM, rawP: rawP, stop: stop }));
-					clt_skt.close(1000, "Descent over");
+					console.log("je suis running");
+					if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
+						clt_skt.send(JSON.stringify({ isRunning: isRunning }));
 				}	
+				else
+				{
+					isRunning = true;
+					const { k, rawM, rawP, stop } = await gradient(clt_skt);
+					if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
+					{
+						clt_skt.send(JSON.stringify({ k: k, rawM: rawM, rawP: rawP, stop: stop }));					
+						// clt_skt.close(1000, "Descent over");
+					}
+					isRunning = false;
+				}				
 			}			
 		}
 		catch (e) {

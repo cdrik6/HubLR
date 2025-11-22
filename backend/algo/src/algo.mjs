@@ -15,18 +15,23 @@ export async function gradient(clt_skt)
     let stop = false;
     
     const data = await getNormData();    
-    if (data.length === 0) return ({ k, rawM, rawM, stop });
+    if (data.length === 0)
+        return ({ k, rawM, rawP, stop });
     const raw = await getRawData();    
-    if (raw.length === 0) return ({ k, rawM, rawM, stop });
+    if (raw.length === 0) 
+        return ({ k, rawM, rawP, stop });
     const X = raw.map( item => item.x);    
     const Y = raw.map( item => item.y);    
     const minX = X.length ? Math.min(...X) : 0;
     const maxX = X.length ? Math.max(...X) : 0;
     const minY = Y.length ? Math.min(...Y) : 0;
     const maxY = Y.length ? Math.max(...Y) : 0;
-    if (maxX === minX) return ({ k, rawM, rawM, stop });
+    if (maxX === minX) 
+        return ({ k, rawM, rawP, stop });
     console.log(data.length);
-
+    // init
+    await cleanAlgoDB();
+    await insertCoef(rawM, rawP); // k++;
     // algo
     while ((Math.abs(errM) > ACCURACY || Math.abs(errP) > ACCURACY) && k < MAX_ITER)
     {
@@ -46,8 +51,9 @@ export async function gradient(clt_skt)
         k++;
     }
     // console.log("k = " + k);     
-    if (k >= MAX_ITER) stop = true
-    return ({ k, rawM, rawP, stop });    
+    if (k >= MAX_ITER)
+        stop = true
+    return ({ k, rawM, rawP, stop });
 }
 
 async function insertCoef(m, p)
@@ -56,13 +62,21 @@ async function insertCoef(m, p)
 	await execute(db, sql, [m, p]);
 }
 
+async function cleanAlgoDB(m, p)
+{
+	let sql = `DELETE FROM algo`;
+	await execute(db, sql);
+    sql = `VACUUM`;
+	await execute(db, sql);
+}
+
 async function getNormData()
 {	
 	try {
 		const res = await fetch("http://data:5000/norm", { method: 'GET' })
 		if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
 		const data = await res.json();
-		console.log(data);
+		// console.log(data);
         return (data);
 	}
 	catch(err) { console.error(err); };		
@@ -74,7 +88,7 @@ export async function getRawData()
 		const res = await fetch("http://data:5000/scatter", { method: 'GET' })
 		if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
 		const data = await res.json();
-		console.log(data);
+		// console.log(data);
         return (data);
 	}
 	catch(err) { console.error(err); };		
