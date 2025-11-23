@@ -4,7 +4,8 @@ const routes = {
     home : { html: "/html/home.html", js: "" },
     data : { html: "/html/data.html", js: "data.js" },
     graph : { html: "/html/graph.html", js: "graph.js" },
-    gradient : { html: "/html/gradient.html", js: "gradient.js" }
+    gradient : { html: "/html/gradient.html", js: "gradient.js" },
+    model : { html: "/html/model.html", js: "model.js" }
 };
 
 async function navigate(page)

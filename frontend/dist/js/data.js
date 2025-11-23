@@ -1,4 +1,4 @@
-let fileInput, fileContent, fileMessage, loadMessage, loadBtn;
+let fileInput, fileContent, fileMessage, loadMessage, loadBtn, clearMessage, clearBtn;
 let rawdata;
 
 export function init()
@@ -7,16 +7,20 @@ export function init()
   fileContent = document.getElementById("fileContent");
   fileMessage = document.getElementById("fileMessage");
   loadMessage = document.getElementById("loadMessage");
-  loadBtn = document.getElementById("loadBtn");  
+  loadBtn = document.getElementById("loadBtn");
+  clearMessage = document.getElementById("clearMessage");
+  clearBtn = document.getElementById("clearBtn");   
   fileInput.addEventListener("change", handleFileSelection);
   loadBtn.addEventListener("click", handleLoadData);
+  clearBtn.addEventListener("click", handleClearData);
 }
 
 export function cleanup()
 {  
   fileInput?.removeEventListener("change", handleFileSelection);
   loadBtn?.removeEventListener("click", handleLoadData);
-  fileInput = fileContent = fileMessage = loadMessage = loadBtn = null;
+  clearBtn?.removeEventListener("click", handleClearData);
+  fileInput = fileContent = fileMessage = loadMessage = loadBtn = clearMessage = clearBtn = null;
   rawdata = null;
 }
 
@@ -90,12 +94,21 @@ async function handleLoadData()
   rawdata = null;
 }
 
+async function handleClearData()
+{  
+  await clearData();
+  showMessage("Data deleted.", "clear");
+  rawdata = null;
+}
+
 function showMessage(message, step)
 {
   if (step === "file")
     fileMessage.textContent = message;
   if (step === "load")
     loadMessage.textContent += message + "\n";
+  if (step === "clear")
+    clearMessage.textContent = message;
 }
 
 async function loadData(km, price)
@@ -106,6 +119,21 @@ async function loadData(km, price)
 				headers: { 'Content-Type': 'application/json; charset=UTF-8'},
 				body: JSON.stringify({ km: km, price: price })
 			})		
+		if (!res.ok) {
+      throw new Error(`HTTP error status: ${res.status}`);
+    }		
+		const data = await res.json();	
+		// console.log("Server response:", data);
+	}	
+	catch (error) {
+		console.error("Server error:", error);
+	}	
+}
+
+async function clearData(km, price)
+{	
+	try {
+		const res = await fetch(`/api/data/clear`, { method: 'DELETE' })
 		if (!res.ok) {
       throw new Error(`HTTP error status: ${res.status}`);
     }		

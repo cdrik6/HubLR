@@ -2,6 +2,8 @@ import Fastify from 'fastify';
 import { WebSocketServer } from 'ws';
 import algoRoutes from './algoAPI.mjs';
 import { gradient }  from './algo.mjs';
+import { INIT_M, INIT_P } from './config.mjs';
+import { insertCoef } from './algo.mjs';
 
 const fastify = Fastify({ logger: true });
 const PORT = 5000;
@@ -29,9 +31,9 @@ srv_wskt.on('connection', (clt_skt) => {
 			{
 				if (isRunning)
 				{
-					console.log("je suis running");
-					if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
-						clt_skt.send(JSON.stringify({ isRunning: isRunning }));
+					console.log("Running");
+					if (clt_skt && clt_skt.readyState === WebSocket.OPEN)					
+						clt_skt.send(JSON.stringify({ isRunning: isRunning }));						
 				}	
 				else
 				{
@@ -40,8 +42,9 @@ srv_wskt.on('connection', (clt_skt) => {
 					if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
 					{
 						clt_skt.send(JSON.stringify({ k: k, rawM: rawM, rawP: rawP, stop: stop }));					
-						// clt_skt.close(1000, "Descent over");
+						clt_skt.close(1000, "Descent over");
 					}
+					console.log("Descent over");
 					isRunning = false;
 				}				
 			}			
@@ -87,4 +90,5 @@ async function set_db()
     }    
 }
 await set_db();
+await insertCoef(INIT_M, INIT_P);
 export { db };

@@ -1,9 +1,21 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
-import { normSchema, barSchema, regSchema, insertSchema, scatterSchema } from './dataSchema.mjs'
+import { normSchema, barSchema, regSchema, insertSchema, scatterSchema, deleteSchema, } from './dataSchema.mjs'
 
 export default async function dataRoutes(fastify, options)
 {
+	// delete data
+	fastify.delete('/clear', { schema: deleteSchema }, async function(request, reply)
+	{
+		try {						
+			await clearData();
+			reply.code(200).send({message:"Data cleared"});
+		} catch (error) {
+			console.log(error);
+			reply.code(500).send({error: "Clear data failed"});
+		}
+	})
+	
 	// route to insert data from loading
 	fastify.post('/insert', { schema: insertSchema }, async function(request, reply)
 	{			
@@ -208,6 +220,13 @@ export default async function dataRoutes(fastify, options)
 	}
 }
 
+async function clearData()
+{
+	let sql = `DELETE FROM data`;
+	await execute(db, sql);
+    sql = `VACUUM`;
+	await execute(db, sql);
+}
 
 async function insertData(data)
 {

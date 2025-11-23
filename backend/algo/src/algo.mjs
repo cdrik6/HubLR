@@ -1,6 +1,6 @@
 import { execute } from './sql.mjs';
 import { db } from './server.mjs'
-import { ACCURACY, INIT_M, INIT_P, LEARNING_RATE, MAX_ITER } from './config.js';
+import { ACCURACY, INIT_M, INIT_P, LEARNING_RATE, MAX_ITER } from './config.mjs';
 
 export async function gradient(clt_skt)
 {
@@ -14,6 +14,10 @@ export async function gradient(clt_skt)
     let k = 0;
     let stop = false;
     
+    // init
+    await cleanAlgoDB();
+    await insertCoef(rawM, rawP); // k++;
+    //
     const data = await getNormData();    
     if (data.length === 0)
         return ({ k, rawM, rawP, stop });
@@ -28,10 +32,7 @@ export async function gradient(clt_skt)
     const maxY = Y.length ? Math.max(...Y) : 0;
     if (maxX === minX) 
         return ({ k, rawM, rawP, stop });
-    console.log(data.length);
-    // init
-    await cleanAlgoDB();
-    await insertCoef(rawM, rawP); // k++;
+    console.log(data.length);    
     // algo
     while ((Math.abs(errM) > ACCURACY || Math.abs(errP) > ACCURACY) && k < MAX_ITER)
     {
@@ -48,7 +49,7 @@ export async function gradient(clt_skt)
         if (clt_skt && clt_skt.readyState === WebSocket.OPEN)
             clt_skt.send(JSON.stringify({ m: m, p: p, rawM: rawM, rawP: rawP, maxX: maxX, minX: minX }));        
         await insertCoef(rawM, rawP);
-        k++;
+        k++;        
     }
     // console.log("k = " + k);     
     if (k >= MAX_ITER)
@@ -56,7 +57,7 @@ export async function gradient(clt_skt)
     return ({ k, rawM, rawP, stop });
 }
 
-async function insertCoef(m, p)
+export async function insertCoef(m, p)
 {
 	const sql = `INSERT INTO algo (m, p) VALUES (?, ?)`;
 	await execute(db, sql, [m, p]);

@@ -142,14 +142,17 @@ function launchAlgo()
     // algoBtn.style.display = 'none';
     // algoBtn?.removeEventListener("click", launchAlgo);
     // algoBtn = null;
-    algoMessage.textContent = "Running..."
-    clt_wskt.send(JSON.stringify({ start: "start" }));    
+    if (clt_wskt)
+    {
+        clt_wskt.send(JSON.stringify({ start: "start" }));
+        algoMessage.textContent = "Running..."
+    }    
 }
 
 // WebSocket
 function set_wskt()
 {    
-    clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);    
+    clt_wskt = new WebSocket(`${location.origin}/api/algo/lines`);
 
     clt_wskt.addEventListener('open', () => {	
         console.log('Connected to Algo WebSocket\n');
@@ -186,15 +189,13 @@ function set_wskt()
                     algoMessage.textContent = "Limit reached!\nm = " + data.rawM + " p = " + data.rawP;                
                 else                
                     algoMessage.textContent = "Done!\nm = " + data.rawM + " p = " + data.rawP;                
+                clt_wskt = null;                
             }
             else if ('isRunning' in data)
-            {
-                console.log("k = running");
-                algoMessage.textContent = "Wait please, gradient in progress";
-                // algoBtn = document.getElementById("algoBtn");  
-                // algoBtn.addEventListener("click", launchAlgo);
-            }    
-
+            {                
+                console.log("Running");
+                algoMessage.textContent = "Please wait, gradient in progress";
+            }
         }
         catch (err) {
             console.error('Invalid JSON received: ', err);
