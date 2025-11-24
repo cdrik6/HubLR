@@ -1,4 +1,4 @@
-import { execute } from './sql.mjs';
+import { execute, fetchOne } from './sql.mjs';
 import { db } from './server.mjs'
 import { ACCURACY, INIT_M, INIT_P, LEARNING_RATE, MAX_ITER } from './config.mjs';
 
@@ -63,6 +63,16 @@ export async function insertCoef(m, p)
 	await execute(db, sql, [m, p]);
 }
 
+export async function getLastCoef()
+{
+	const sql = `
+		SELECT m, p
+		FROM algo
+		ORDER BY id DESC LIMIT 1;
+	`;
+	return (await fetchOne(db, sql));
+}
+
 async function cleanAlgoDB(m, p)
 {
 	let sql = `DELETE FROM algo`;
@@ -93,4 +103,60 @@ export async function getRawData()
         return (data);
 	}
 	catch(err) { console.error(err); };		
+}
+
+// mean square error = variance residuelle = 1/n sum((ypred - yreel)^2)
+// variance totale = variance expliquee + variance residuelle
+export async function mse()
+{
+    const data = await getRawData();    
+    if (data.length === 0)
+        return (0);
+    const { m, p } = await getLastCoef();    
+    const MSE = (1 / data.length) * data.reduce((sum, { x, y }) => sum + (m * x + p - y) ** 2, 0);
+    return (MSE);
+}
+
+// sqrt mean square error = ecart-type residuel
+export async function sqrt_mse()
+{    
+    const MSE = await mse();    
+    return (Math.sqrt(MSE));
+}
+
+// R^2 = coeff de correlation = var expliquee / var totale
+// R^2 = sum((ypred - moyypred)^2) / sum((yreel - moyyreel)^2)
+// R^2 = COV(X,Y)^2 / V(X).V(Y) = ( sum((x - moyx).(y - moyy)) )^2 / sum((x - moyx)^2) . sum((y - moyy)^2)
+export async function rsquare()
+{
+    const data = await getRawData();    
+    if (data.length === 0)
+        return (0);
+    const X = data.map(point => point.x);
+	const Y = data.map(point => point.y);
+    const mX = mean(X);
+    const mY = mean(Y);
+    const R2 = (covariance(data, mX, mY)) ** 2 / (variance(X, mX) * variance(Y, mY));
+    return (R2);
+}
+
+function mean(arr)
+{		
+    if (arr.length === 0)
+        return (0);
+    return (arr.reduce((sum, x) => sum + x, 0) / arr.length);
+}
+
+function covariance(arr, mX, mY)
+{		
+    if (arr.length === 0)
+        return (0);
+    return (arr.reduce((sum, { x, y }) => sum + (x - mX)*(y - mY), 0));
+}
+
+function variance(arr, mX)
+{		
+    if (arr.length === 0)
+        return (0);
+    return (arr.reduce((sum, x) => sum + (x - mX)*(x - mX), 0));
 }
