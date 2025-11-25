@@ -47,45 +47,6 @@ export const deleteSchema = {
     }	
 }
 
-export const amendSchema = {
-    params: {
-			type: "object",
-			properties: { userid: { type: "integer" } },
-			required: ["userid"],
-            additionalProperties: false
-	},
-    body: {
-        type: "object",			
-        properties: { newAlias : { type: "string" } },
-        required: ["newAlias"],
-        additionalProperties: false
-    },		
-    response: {
-        200: { type: "object", properties: { message: { type: "string" } } },        
-        500: { type: "object", properties: { error: { type: "string" } } }
-    }	
-}
-
-export const pieSchema = {    
-    response: {
-        200: {
-            type: "object",
-            properties: {
-                labels: { type: "array", items: { type: "string" } },
-                values: { type: "array", items: { type: "integer" } }
-            },
-            required: ["labels", "values"],
-            additionalProperties: false
-        },
-        500: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        }
-    }
-};
-
 export const barSchema = {    
     response: {
         200: {
@@ -197,184 +158,20 @@ export const regSchema = {
     }
 };
 
-export const userdataSchema = {
-    params: {
-        type: "object",
-        properties: { id: { type: "integer" } },
-        required: ["id"],
-        additionalProperties: false
-	},    
+// { m: m, p: p, mse: MSE, rmse: RMSE, r2: R2}
+export const qualitySchema = {    
     response: {
-        200: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    userid: { type: "integer" },
-                    diff: { type: "integer" },
-                    maxtouch: { type: "integer" },
-                    speedy:  { type: "boolean" },
-                    paddy:  { type: "boolean" },
-                    wally:  { type: "boolean" },
-                    mirry:  { type: "boolean" },
-                    multy:  { type: "boolean" },
-                    nbMatch: { type: "integer" },
-                    nbWin: { type: "integer" },
-                    rank: { type: "integer" } 
-                },            
-                additionalProperties: false
-            }
-        },
-        401: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        },
-        500: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        }
-    }
-};
-
-export const userpieSchema = {
-    params: {
-        type: "object",
-        properties: { id: { type: "integer" } },
-        required: ["id"],
-        additionalProperties: false
-	},
-    response: {
-        200: {
+        200: {            
             type: "object",
             properties: {
-                labels: { type: "array", items: { type: "string" } },
-                values: { type: "array", items: { type: "integer" } }
+                m: { type: "number" },
+                p: { type: "number" },
+                mse: { type: "number" },
+                rmse: { type: "number" },
+                r2: { type: "number" }
             },
-            required: ["labels", "values"],
-            additionalProperties: false
-        },
-        401: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        },
-        500: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        }
-    }
-};
-
-export const userlineSchema = {
-    params: {
-        type: "object",
-        properties: { id: { type: "integer" } },
-        required: ["id"],
-        additionalProperties: false
-	},
-    response: {
-        200: {
-            type: "object",
-            properties: {
-                row: { type: "array", items: { type: "integer" } },
-                maxtouch: { type: "array", items: { type: "integer" } }
-            },
-            required: ["row", "maxtouch"],
-            additionalProperties: false
-        },
-        401: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        },
-        500: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        }
-    }
-};
-
-export const userwinSchema = {
-    params: {
-        type: "object",
-        properties: { id: { type: "integer" } },
-        required: ["id"],
-        additionalProperties: false
-	},
-    response: {
-        200: {
-            type: "object",
-            properties: {
-                row: { type: "array", items: { type: "integer" } },
-                win: { type: "array", items: { type: "integer" } }
-            },
-            required: ["row", "win"],
-            additionalProperties: false
-        },
-        401: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        },
-        500: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
-        }
-    }
-};
-
-export const usertableSchema = {
-    params: {
-        type: "object",
-        properties: { id: { type: "integer" } },
-        required: ["id"],
-        additionalProperties: false
-	},
-    response: {
-        200: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    id: { type: "integer" },
-                    gameid: { type: "integer" },
-                    userid1: { type: "integer" },
-                    userid2: { type: "integer" },
-                    player1: { type: "string" },
-                    player2: { type: "string" },
-                    winner: { type: "string" },
-                    winnerid: { type: "integer" },
-                    score1: { type: "integer" },
-                    score2: { type: "integer" },
-                    maxtouch: { type: "integer" },
-                    speedy:  { type: "boolean" },
-                    paddy:  { type: "boolean" },
-                    wally:  { type: "boolean" },
-                    mirry:  { type: "boolean" },
-                    multy:  { type: "boolean" },                
-                    created_at: { type: "string", format: "date-time" }
-                },
-                additionalProperties: false
-            }
-        },
-        401: {
-            type: "object",
-            properties: { error: { type: "string" } },
-            required: ["error"],
-            additionalProperties: false
+            required: ["m", "p", "mse", "rmse", "r2"],
+            additionalProperties: false            
         },
         500: {
             type: "object",

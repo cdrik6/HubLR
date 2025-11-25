@@ -136,7 +136,11 @@ export async function rsquare()
 	const Y = data.map(point => point.y);
     const mX = mean(X);
     const mY = mean(Y);
-    const R2 = (covariance(data, mX, mY)) ** 2 / (variance(X, mX) * variance(Y, mY));
+    const varX = variance(X, mX);
+    const varY = variance(Y, mY);
+    let R2 = 0;
+    if (varX != 0 && varY != 0)
+        R2 = (covariance(data, mX, mY)) ** 2 / (varX * varY);
     return (R2);
 }
 

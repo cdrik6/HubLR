@@ -11,21 +11,22 @@ export async function init()
   mseP = document.getElementById("mse");
   rmseP = document.getElementById("rmse");
   r2P = document.getElementById("r2");
-  // mileageInput.addEventListener("change", handleMileage);
+
   predictBtn.addEventListener("click", handlePredict);  
+
   const data = await getCoef();
   m = data.m;
   p = data.p;
   modelP.textContent = "estimatePrice(mileage) = " + m + " x mileage + " + p;
+
   const quality = await getQuality();  
-  mseP.textContent = "Mean Square Error = " + quality.mse;
-  rmseP.textContent = "Square Root MSE = " + quality.rmse;
-  r2P.textContent = "Coefficient of Determination (R2) = " + quality.r2;
+  mseP.textContent = "Mean Square Error = " + Math.round(quality.mse);
+  rmseP.textContent = "Square Root MSE = " + Math.round(quality.rmse);
+  r2P.textContent = "Coefficient of Determination (R2) = " + (100 * quality.r2).toFixed(1) + "%";
 }
 
 export function cleanup()
-{  
-  // mileageInput?.removeEventListener("change", handleMileage);
+{   
   predictBtn?.removeEventListener("click", handlePredict);  
   mileageInput = predictBtn = modelP = estimatePre = null;  
   mseP = rmseP = r2P = null;
@@ -45,7 +46,7 @@ function handlePredict(event)
 async function getCoef()
 {	
 	try {
-		const res = await fetch(`/api/algo/coef`, {	method: 'GET' })  /*****************SCHEMA TO DO */
+		const res = await fetch(`/api/algo/coef`, {	method: 'GET' })
 		if (!res.ok) {
       throw new Error(`HTTP error status: ${res.status}`);
     }		
@@ -63,7 +64,7 @@ async function getCoef()
 async function getQuality()
 {	
 	try {
-		const res = await fetch(`/api/algo/quality`, { method: 'GET' })  /*****************SCHEMA TO DO */
+		const res = await fetch(`/api/algo/quality`, { method: 'GET' })
 		if (!res.ok) {
       throw new Error(`HTTP error status: ${res.status}`);
     }		

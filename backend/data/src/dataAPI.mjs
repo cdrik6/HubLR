@@ -1,6 +1,6 @@
 import { db } from './server.mjs'
 import { execute, fetchAll } from './sql.mjs';
-import { normSchema, barSchema, regSchema, insertSchema, scatterSchema, deleteSchema, } from './dataSchema.mjs'
+import { normSchema, barSchema, regSchema, insertSchema, scatterSchema, deleteSchema, qualitySchema} from './dataSchema.mjs'
 
 export default async function dataRoutes(fastify, options)
 {
@@ -161,10 +161,7 @@ export default async function dataRoutes(fastify, options)
 	{		
 		try {					
 			const points = await getPoints();
-			const datapoints = points.map(point => ({ x: point.km, y: point.price }));			
-			// const res = await fetch("http://data/norm", { method: 'GET' })
-			// if (!res.ok) { throw new Error(`HTTP error status: ${res.status}`); }
-			// const datapoints = await res.json();
+			const datapoints = points.map(point => ({ x: point.km, y: point.price }));						
 			const X = datapoints.map(point => point.x);
 			const Y = datapoints.map(point => point.y);			
 			const mX = mean(X);
@@ -197,27 +194,63 @@ export default async function dataRoutes(fastify, options)
 			reply.code(500).send({ error: "Get data to reg chart failed" });
 		}
 	});
-
-	function mean(arr)
+	
+	// Get quality indicators
+	fastify.get('/quality', { schema: qualitySchema }, async function (request, reply)
 	{		
-		if (arr.length === 0)
-			return (0);
-  		return (arr.reduce((sum, x) => sum + x, 0) / arr.length);
-	}
+		try {
+			const points = await getPoints();
+			const datapoints = points.map(point => ({ x: point.km, y: point.price }));						
+			const X = datapoints.map(point => point.x);
+			const Y = datapoints.map(point => point.y);			
+			const mX = mean(X);
+			const mY = mean(Y);			
+			const covXY = covariance(datapoints, mX, mY);			
+			const varX = variance(X, mX);
+			const varY = variance(Y, mY);
+			let m = 0;
+			let p = 0;
+			if (varX !== 0)
+				m = covXY / varX;			
+			p = mY - m * mX;
+			let MSE = 0;
+			let RMSE = 0;
+			let R2 = 0;
+			if (datapoints.length != 0)
+			{
+				MSE = (1 / datapoints.length) * datapoints.reduce((sum, { x, y }) => sum + (m * x + p - y) ** 2, 0);
+				RMSE = Math.sqrt(MSE);
+				if (varX != 0 && varY != 0)
+					R2 = (covXY ** 2) / (varX * varY);
+			}						
+			reply.code(200).send({ m: m, p: p, mse: MSE, rmse: RMSE, r2: R2});
+		}
+		catch (err)	{
+			console.error(err);
+			reply.code(500).send({ error: "Get data quality failed" });
+		}
+	});	
+}
 
-	function covariance(arr, mX, mY)
-	{		
-		if (arr.length === 0)
-			return (0);
-  		return (arr.reduce((sum, { x, y }) => sum + (x - mX)*(y - mY), 0));
-	}
+function mean(arr)
+{		
+	if (arr.length === 0)
+		return (0);
+	return (arr.reduce((sum, x) => sum + x, 0) / arr.length);
+}
 
-	function variance(arr, mX)
-	{		
-		if (arr.length === 0)
-			return (0);
-  		return (arr.reduce((sum, x) => sum + (x - mX)*(x - mX), 0));
-	}
+function covariance(arr, mX, mY)
+{		
+	if (arr.length === 0)
+		return (0);
+	return (arr.reduce((sum, { x, y }) => sum + (x - mX)*(y - mY), 0));
+}
+
+function variance(arr, mX)
+{		
+	if (arr.length === 0)
+		return (0);
+	return (arr.reduce((sum, x) => sum + (x - mX)*(x - mX), 0));
 }
 
 async function clearData()
